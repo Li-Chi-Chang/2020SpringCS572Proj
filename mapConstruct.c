@@ -168,5 +168,4 @@ int drawMaze()
 
 void test()
 {
-    
 }
