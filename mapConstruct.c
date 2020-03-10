@@ -16,7 +16,7 @@ typedef struct
     unsigned int name:8;
 }mapNode;
 
-mapNode map[MAZEHEIGHT][MAZEWIDTH];
+mapNode map[ MAZEHEIGHT ][ MAZEWIDTH ];
 
 int readMaze();
 int drawMaze();
@@ -53,7 +53,6 @@ int readMaze()
 
     while ((read = getline(&line, &len, fp)) != -1) 
     {
-        //printf("%s", line);
         const mapNode init = {.top = 0, .right = 0, .bottom = 0, .left = 0, .name = ' '};
         char *tok = strtok(line,"\t");
         int x,y;
@@ -99,16 +98,21 @@ int readMaze()
     return 0;
 }
 
-int drawMaze(){
+int drawMaze()
+{
     for(int y = MAZEHEIGHT -1; y >= 0; y--)
     {
         for(int x = 0; x<MAZEWIDTH; x++)
         {
             printf("+");
             if(map[x][y].top == 1)
+            {
                 printf("-----");
+            }
             else if(map[x][y].top == 2)
+            {
                 printf("-] [-");
+            }
             else
             {
                 printf("     ");
