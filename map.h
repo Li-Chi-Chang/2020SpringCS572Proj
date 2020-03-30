@@ -56,3 +56,7 @@ mapNode getNodeInfo();
 
 // print the trace route or not
 #define ISPRINTTRACE 1
+
+// delaying time
+#define DELAYING 50000
+#define WITHOUTDELAYING 0

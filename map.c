@@ -71,10 +71,13 @@ int readMaze()
 
     mouseX = entryX, mouseY = entryY, mouseHead = entryHead;
     initMap = 1;
-    drawMaze(mouseX,mouseY, 0);
+    drawMaze(mouseX,mouseY, WITHOUTDELAYING);
     return err(0);
 }
 
+/**
+ * the return node is based on the mouse view, not the absolute NEWS.
+ */ 
 mapNode getNodeInfo()
 {
     int north = map[mouseX][mouseY].north;
@@ -186,17 +189,14 @@ int rotate(int direction)
         }
         break;
     }
-    return drawMaze(mouseX, mouseY, 1);
+    return drawMaze(mouseX, mouseY, DELAYING);
 }
 
 // Small functions
 void clearScreen(int isdelay)
 {
-    if(isdelay)
-    {
-        usleep(50000);
-        //sleep(isdelay);
-    }
+    usleep(DELAYING);
+    //sleep(isdelay);
     printf("\e[1;1H\e[2J");
 }
 
@@ -334,14 +334,19 @@ int drawMaze(int locationX, int locationY, int isdelay)
                 printf("  %1c  ", map[x][y].name);
             }
         }
-        if(map[MAZEWIDTH - 1][y].east == WALL)
+        if(map[MAZEWIDTH - 1][y].east == WALL && !(mouseX == MAZEWIDTH - 1 && mouseY == y && mouseHead == EAST))
         {
             printf("|\n");
         }
-        else if(map[MAZEWIDTH -1][y].east == ENTRY)
+        else if(map[MAZEWIDTH -1][y].east == ENTRY && !(mouseX == MAZEWIDTH - 1 && mouseY == y && mouseHead == EAST))
         {
             printf("=\n");
         }
+        else
+        {
+            printf(">\n");
+        }
+        
     }
     //print the bottom layer
     if(ISPRINTCORD)
@@ -350,17 +355,36 @@ int drawMaze(int locationX, int locationY, int isdelay)
     }
     for(x = 0; x < MAZEWIDTH; x++)
     {
-        if(map[x][0].south == WALL)
+        if((mouseX == x && mouseY == 0 && mouseHead == SOUTH))
         {
-            printf("+-----");
-        }
-        else if(map[x][0].south == ENTRY)
-        {
-            printf("+-] [-");
+            if(map[x][0].south == WALL)
+            {
+                printf("+--v--");
+            }
+            else if(map[x][0].south == ENTRY)
+            {
+                printf("+-]v[-");
+            }
+            else
+            {
+                printf("+  v  ");
+            }
+            
         }
         else
         {
-            printf("+     ");
+            if(map[x][0].south == WALL)
+            {
+                printf("+-----");
+            }
+            else if(map[x][0].south == ENTRY)
+            {
+                printf("+-] [-");
+            }
+            else
+            {
+                printf("+     ");
+            }
         }
     }
     printf("+\n");
@@ -378,7 +402,7 @@ int drawMaze(int locationX, int locationY, int isdelay)
 
 int goTop(mapNode currentNode)
 {
-    int isdelay = 0;
+    int isdelay = WITHOUTDELAYING;
     switch (mouseHead)
     {
     case NORTH:
@@ -389,7 +413,7 @@ int goTop(mapNode currentNode)
                 map[mouseX][mouseY].name = TRACE;
             }
             mouseY = mouseY + 1;
-            isdelay = 1;
+            isdelay = DELAYING;
         }
         drawMaze(mouseX, mouseY,isdelay);
         return (currentNode.north<<8) + currentNode.name;
@@ -401,7 +425,7 @@ int goTop(mapNode currentNode)
                 map[mouseX][mouseY].name = TRACE;
             }
             mouseY = mouseY - 1;
-            isdelay = 1;
+            isdelay = DELAYING;
         }
         drawMaze(mouseX, mouseY,isdelay);
         return (currentNode.south<<8) + currentNode.name;
@@ -413,7 +437,7 @@ int goTop(mapNode currentNode)
                 map[mouseX][mouseY].name = TRACE;
             }
             mouseX = mouseX - 1;
-            isdelay = 1;
+            isdelay = DELAYING;
         }
         drawMaze(mouseX, mouseY,isdelay);
         return (currentNode.west<<8) + currentNode.name;
@@ -425,7 +449,7 @@ int goTop(mapNode currentNode)
                 map[mouseX][mouseY].name = TRACE;
             }
             mouseX = mouseX + 1;
-            isdelay = 1;
+            isdelay = DELAYING;
         }
         drawMaze(mouseX, mouseY,isdelay);
         return (currentNode.east<<8) + currentNode.name;

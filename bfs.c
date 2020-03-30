@@ -19,21 +19,22 @@ void init()
     initStackInt();
 }
 
+/**
+ * algo: go until meet branch
+ * If meet a brach, go the right side
+ * using the bfs algo
+ * */
 void goToTheRight()
 {
-    while(goNext()>>8 != WALL);
-    rotate(RIGHT);
-    if(goNext()>>8 != WALL)
+    mapNode current = getNodeInfo();
+    char mousetop = current.north;
+    char mouseleft = current.west;
+    char mouseright = current.east;
+
+    if(mousetop == ENTRY || mouseleft == ENTRY || mouseright == ENTRY)
     {
-        goToTheRight();
+        
     }
-    else
-    {
-        rotate(LEFT);
-        rotate(LEFT);
-        if(goNext()>>8 != WALL)
-        {
-            goToTheRight();
-        }
-    }
+
+    while(rotate(RIGHT)==0);
 }
