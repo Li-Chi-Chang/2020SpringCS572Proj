@@ -5,6 +5,9 @@
 #include <string.h>
 //sleep function
 #include <unistd.h>
+//usleep
+//#include <time.h>
+
 #include "err.h"
 typedef struct
 {
@@ -41,6 +44,7 @@ mapNode getNodeInfo();
 #define BOTTOM 6
 #define RIGHT 5
 #define LEFT 7
+#define TRACE '#'
 
 // the information about entry point
 #define entryX 0

@@ -194,7 +194,8 @@ void clearScreen(int isdelay)
 {
     if(isdelay)
     {
-        sleep(isdelay);
+        usleep(50000);
+        //sleep(isdelay);
     }
     printf("\e[1;1H\e[2J");
 }
@@ -324,9 +325,9 @@ int drawMaze(int locationX, int locationY, int isdelay)
             {
                 printf("  %1c  ", '@');
             }
-            else if(ISPRINTTRACE && map[x][y].name == '-')
+            else if(ISPRINTTRACE && map[x][y].name == TRACE)
             {
-                printf(" -%1c- ", map[x][y].name);
+                printf("  %1c  ", map[x][y].name);
             }
             else
             {
@@ -385,7 +386,7 @@ int goTop(mapNode currentNode)
         {
             if(ISPRINTTRACE && map[mouseX][mouseY].name == ' ')
             {
-                map[mouseX][mouseY].name = '|';
+                map[mouseX][mouseY].name = TRACE;
             }
             mouseY = mouseY + 1;
             isdelay = 1;
@@ -397,7 +398,7 @@ int goTop(mapNode currentNode)
         {
             if(ISPRINTTRACE && map[mouseX][mouseY].name == ' ')
             {
-                map[mouseX][mouseY].name = '|';
+                map[mouseX][mouseY].name = TRACE;
             }
             mouseY = mouseY - 1;
             isdelay = 1;
@@ -409,7 +410,7 @@ int goTop(mapNode currentNode)
         {
             if(ISPRINTTRACE && map[mouseX][mouseY].name == ' ')
             {
-                map[mouseX][mouseY].name = '-';
+                map[mouseX][mouseY].name = TRACE;
             }
             mouseX = mouseX - 1;
             isdelay = 1;
@@ -421,7 +422,7 @@ int goTop(mapNode currentNode)
         {
             if(ISPRINTTRACE && map[mouseX][mouseY].name == ' ')
             {
-                map[mouseX][mouseY].name = '-';
+                map[mouseX][mouseY].name = TRACE;
             }
             mouseX = mouseX + 1;
             isdelay = 1;
