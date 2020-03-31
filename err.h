@@ -7,5 +7,6 @@ int err(int);
 #define NOINITERR 0x01
 #define FILEERR 0x02
 #define COMMANDNOTFOUND 0x03
-#define STACKEMPTY 0xFFFFFFFF
-#define ALLOCATIONERR 0x04
+
+
+#define CHECKPOINT system("echo \"hi1\" >> log");

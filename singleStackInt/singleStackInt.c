@@ -1,4 +1,4 @@
-#include "stackInt.h"
+#include "singleStackInt.h"
 
 int initStack = 0;
 
@@ -27,7 +27,7 @@ int push(unsigned int data)
 {
     if(!initStack)
     {
-        return err(NOINITERR);
+        return stackerr(NOINITSTACKERR);
     }
     stackNode *newNode = (stackNode*) malloc(sizeof(stackNode));
     if(newNode == NULL)
@@ -45,7 +45,7 @@ unsigned int pop()
 {
     if(!initStack)
     {
-        return err(NOINITERR);
+        return stackerr(NOINITSTACKERR);
     }
     if(stackbase.data != 0)
     {
@@ -56,11 +56,39 @@ unsigned int pop()
     }
     else
     {
-        return err(STACKEMPTY);
+        return stackerr(STACKEMPTY);
     }
 }
 
 int getStackLen()
 {
     return stackbase.data;
+}
+
+/**
+ * 
+ */
+int stackerr(int errcode)
+{
+    if(errcode == 0)
+    {
+        return 0;
+    }
+
+    printf("Error here.\nerr code: ");
+    switch (errcode)
+    {
+    case NOINITSTACKERR:
+        printf("%d NO INIT STACK ERR!\n",errcode);
+        break;
+    case STACKEMPTY:
+        printf("%d STACK EMPTY!\n",errcode);
+        break;
+    case ALLOCATIONERR:
+        printf("%d ALLOCATION ERR!\n",errcode);
+        break;
+    default:
+        printf("unknown %d\n",errcode);
+    }
+    exit(1);
 }

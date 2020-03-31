@@ -80,11 +80,11 @@ int readMaze()
  */ 
 mapNode getNodeInfo()
 {
-    int north = map[mouseX][mouseY].north;
-    int south = map[mouseX][mouseY].south;
-    int east = map[mouseX][mouseY].east;
-    int west = map[mouseX][mouseY].west;
-    int name = map[mouseX][mouseY].name;
+    unsigned int north = map[mouseX][mouseY].north;
+    unsigned int south = map[mouseX][mouseY].south;
+    unsigned int east = map[mouseX][mouseY].east;
+    unsigned int west = map[mouseX][mouseY].west;
+    unsigned int name = map[mouseX][mouseY].name;
 
     mapNode NodeFromMouseView;
     switch (mouseHead)
@@ -94,21 +94,25 @@ mapNode getNodeInfo()
         NodeFromMouseView.south = south;
         NodeFromMouseView.east = east;
         NodeFromMouseView.west = west;
+        break;
     case SOUTH:
         NodeFromMouseView.north = south;
         NodeFromMouseView.south = north;
         NodeFromMouseView.east = west;
         NodeFromMouseView.west = east;
+        break;
     case WEST:
         NodeFromMouseView.north = west;
         NodeFromMouseView.south = east;
         NodeFromMouseView.east = north;
         NodeFromMouseView.west = south;
+        break;
     case EAST:
         NodeFromMouseView.north = east;
         NodeFromMouseView.south = west;
         NodeFromMouseView.east = south;
         NodeFromMouseView.west = north;
+        break;
     }
 
     NodeFromMouseView.name = name;
@@ -117,7 +121,6 @@ mapNode getNodeInfo()
 }
 
 /**
- * char nextMove
  * return 2: reach the exit
  * return 0: reach to next node
  * return 1: hit the wall
