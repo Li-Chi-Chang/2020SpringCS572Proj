@@ -26,7 +26,7 @@ int readMaze()
 
     while ((read = getline(&line, &len, fp)) != -1) 
     {
-        const mapNode init = {.north = 0, .east = 0, .south = 0, .west = 0, .name = ' ', .reserve = 0};
+        const mapNode init = {.north = 0, .east = 0, .south = 0, .west = 0, .name = ' ', .trace = 0, .reserve = 0};
         char *tok = strtok(line,"\t");
         int x,y,i;
 
@@ -328,11 +328,7 @@ int drawMaze(int locationX, int locationY, int isdelay)
             {
                 printf("  %1c  ", '@');
             }
-            else if(ISPRINTTRACE && map[x][y].name == TRACE)
-            {
-                printf("  %1c  ", map[x][y].name);
-            }
-            else if(ISPRINTNAME && map[x][y].name>='A' && map[x][y].name<='z')
+            else if(ISPRINTNAME && map[x][y].name>='A' && map[x][y].name<='z' && !ISPRINTFORKNODE)
             {
                 printf("  %1c  ", map[x][y].name);
             }
@@ -358,10 +354,18 @@ int drawMaze(int locationX, int locationY, int isdelay)
 
                 if(way == 3)
                     printf("  $  ");
+                else if(ISPRINTTRACE && map[x][y].trace == 1)
+                {
+                    printf("  %1c  ", TRACE);
+                }
                 else
                 {
                     printf("     ");
                 }
+            }
+            else if(ISPRINTTRACE && map[x][y].trace == 1)
+            {
+                printf("  %1c  ", TRACE);
             }
             else
             {
@@ -442,9 +446,9 @@ int goTop(mapNode currentNode)
     case NORTH:
         if(currentNode.north == GRID)
         {
-            if(ISPRINTTRACE && map[mouseX][mouseY].name == ' ')
+            if(ISPRINTTRACE)
             {
-                map[mouseX][mouseY].name = TRACE;
+                map[mouseX][mouseY].trace = 1;
             }
             mouseY = mouseY + 1;
             isdelay = DELAYING;
@@ -454,9 +458,9 @@ int goTop(mapNode currentNode)
     case SOUTH:
         if(currentNode.south == GRID)
         {
-            if(ISPRINTTRACE && map[mouseX][mouseY].name == ' ')
+            if(ISPRINTTRACE)
             {
-                map[mouseX][mouseY].name = TRACE;
+                map[mouseX][mouseY].trace = 1;
             }
             mouseY = mouseY - 1;
             isdelay = DELAYING;
@@ -466,9 +470,9 @@ int goTop(mapNode currentNode)
     case WEST:
         if(currentNode.west == GRID)
         {
-            if(ISPRINTTRACE && map[mouseX][mouseY].name == ' ')
+            if(ISPRINTTRACE)
             {
-                map[mouseX][mouseY].name = TRACE;
+                map[mouseX][mouseY].trace = 1;
             }
             mouseX = mouseX - 1;
             isdelay = DELAYING;
@@ -478,9 +482,9 @@ int goTop(mapNode currentNode)
     case EAST:
         if(currentNode.east == GRID)
         {
-            if(ISPRINTTRACE && map[mouseX][mouseY].name == ' ')
+            if(ISPRINTTRACE)
             {
-                map[mouseX][mouseY].name = TRACE;
+                map[mouseX][mouseY].trace = 1;
             }
             mouseX = mouseX + 1;
             isdelay = DELAYING;

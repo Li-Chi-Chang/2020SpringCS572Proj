@@ -4,8 +4,8 @@ all: bfs
 bfs: bfs.c map stack linkedList
 	gcc -c bfs.c -o obj/bfs.o -Wall
 
-stack: stack/stack.c stack/stack.h
-	gcc -c stack/stack.c -o stack.o -Wall
+stack: stack_C/stack.c stack_C/stack.h
+	gcc -c stack_C/stack.c -o stack.o -Wall
 	cp stack.o obj/stack.o
 	rm stack.o
 

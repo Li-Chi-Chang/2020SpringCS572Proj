@@ -1,6 +1,6 @@
 #include "map.h"
-#include "stack/stack.h"
-#include "linkedList/linkedList.h"
+#include "stack_C/stack.h"
+#include "linkedList_C/linkedList.h"
 
 //basic actions
 void turn(char);//turn a direction

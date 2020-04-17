@@ -16,7 +16,8 @@ typedef struct
     unsigned int south:2;
     unsigned int west:2;
     unsigned int name:8;
-    unsigned int reserve:16;
+    unsigned int trace:1;
+    unsigned int reserve:15;
 }mapNode;
 
 // every program need to call this or the map is empty
@@ -55,7 +56,7 @@ mapNode getNodeInfo();
 #define ISPRINTCORD 1
 
 // print the trace route or not
-#define ISPRINTTRACE 0
+#define ISPRINTTRACE 1
 
 // print name node or not
 #define ISPRINTNAME 0
