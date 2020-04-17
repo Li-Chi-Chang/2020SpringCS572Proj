@@ -1,6 +1,7 @@
 #include "map.h"
 #include "stack_C/stack.h"
 #include "linkedList_C/linkedList.h"
+#include "binaryTree_C/binaryTree.h"
 
 //basic actions
 void turn(char);//turn a direction
@@ -19,6 +20,7 @@ void init();
 
 char mousehead = NORTH;
 int location[2] = {0,0};// 1:x 0:y
+stackBase* forkNodeStack;
 
 #define HEIGHT 0
 #define WIDTH 1
@@ -87,7 +89,7 @@ void init()
 {
     // init
     readMaze();
-    initStackInt();
+    forkNodeStack = initStackInt();
     initErrLog();
 }
 
@@ -101,10 +103,6 @@ void init()
 int goToNextBranch()
 {
     mapNode current = getNodeInfo();
-    //if(current.name >= 'A' && current.name <= 'z')
-    //{
-    //    return 2;
-    //}
     int way = 0;
     if(current.north == GRID)
     {

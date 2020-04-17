@@ -4,9 +4,6 @@
 [submodule "stack_C"]
 	path = stack_C
 	url = https://github.com/Li-Chi-Chang/stack_C.git
-[submodule "BinaryTree_C"]
-	path = BinaryTree_C
-	url = https://github.com/Li-Chi-Chang/BinaryTree_C.git
 [submodule "binaryTree_C"]
 	path = binaryTree_C
 	url = https://github.com/Li-Chi-Chang/binaryTree_C.git
