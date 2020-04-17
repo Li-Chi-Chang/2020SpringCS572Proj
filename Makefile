@@ -9,8 +9,8 @@ stack: stack/stack.c stack/stack.h
 	cp stack.o obj/stack.o
 	rm stack.o
 
-linkedList: linkedList/linkedList.c linkedList/linkedList.h
-	gcc -c linkedList/linkedList.c -o linkedList.o -Wall
+linkedList: linkedList_C/linkedList.c linkedList_C/linkedList.h
+	gcc -c linkedList_C/linkedList.c -o linkedList.o -Wall
 	cp linkedList.o obj/linkedList.o
 	rm linkedList.o
 
