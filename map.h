@@ -55,8 +55,15 @@ mapNode getNodeInfo();
 #define ISPRINTCORD 1
 
 // print the trace route or not
-#define ISPRINTTRACE 1
+#define ISPRINTTRACE 0
+
+// print name node or not
+#define ISPRINTNAME 0
+
+// print fork node or not
+#define ISPRINTFORKNODE 1
 
 // delaying time
-#define DELAYING 50000
+//#define DELAYING 50000
+#define DELAYING 200000
 #define WITHOUTDELAYING 0

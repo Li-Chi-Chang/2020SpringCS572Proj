@@ -1,5 +1,7 @@
 #include "err.h"
 
+int isInitErrLog = 0;
+
 int err(int code)
 {
     switch (code)
@@ -15,13 +17,31 @@ int err(int code)
     case COMMANDNOTFOUND:
         printf("Error here.\nerr code: %d COMMAND NOT FOUND!\n",code);
         exit(1);
-    case STACKEMPTY:
-        printf("Error here.\nerr code: %d STACK EMPTY!\n",code);
-        exit(1);
-    case ALLOCATIONERR:
-        printf("Error here.\nerr code: %d ALLOCATION ERR!\n",code);
+    case BREAKPOINT:
+        printf("Break Point\n");
         exit(1);
     default:
         return code;
     }
+}
+
+int logFile(char* string)
+{
+    if(!isInitErrLog)
+    {
+        return err(NOINITERR);
+    }
+    char command[MAXSTRINGSIZE] = "";
+    strcat(command, "echo \"");
+    strcat(command, string);
+    strcat(command, "\"  >> log.txt\n");
+    system(command);
+
+    return 0;
+}
+
+void initErrLog()
+{
+    isInitErrLog = 1;
+    system("rm log.txt\n");
 }

@@ -6,9 +6,11 @@
  * This is a double linked list. 
  */
 
-#include "linkedListInt.h"
+#include "linkedList.h"
+#include <string.h>
+#include <stdlib.h>
 
-linkedList* initLinkedList(unsigned int data)
+linkedList* initLinkedList(linkedListData data)
 {
     linkedList *newHead = malloc(sizeof(linkedList));
     newHead->data = data;
@@ -17,13 +19,12 @@ linkedList* initLinkedList(unsigned int data)
     return newHead;
 }
 
-void addNodeAtTail(linkedList* node, unsigned int data)
+void addNodeAtTail(linkedList* node, linkedListData data)
 {
     linkedList* tail =  toListTail(node);
     linkedList* newNode  = initLinkedList(data);
     newNode->prev = tail;
     tail->next = newNode;
-    return tail;
 }
 
 linkedList* toListTail(linkedList* node)
@@ -46,16 +47,25 @@ linkedList* toListHead(linkedList* node)
     return head;
 }
 
-int checkDataInList(linkedList* node, unsigned int data)
+int checkDataInList(linkedList* node, linkedListData data)
 {
     linkedList* head = toListHead(node);
-    while(head->data != data)
+    while(!nodeDataEqual(head->data,data) && head != NULL)
     {
         head = head->next;
     }
-    if(head == toListTail(node) && head->data != data)
+    if(head == toListTail(node) && !nodeDataEqual(head->data,data))
     {
         return 0;
     }
     return 1;
+}
+
+int nodeDataEqual(linkedListData a, linkedListData b)
+{
+    linkedListData* pointerA = &a;
+    linkedListData* pointerB = &b;
+    if(!memcmp(pointerA,pointerB,sizeof(linkedListData)))
+        return 1;
+    return 0;
 }

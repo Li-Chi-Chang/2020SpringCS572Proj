@@ -6,12 +6,15 @@
  * This is a double linked list. 
  */
 
-#include <stdlib.h>
+typedef struct linkedListData
+{
+    unsigned int data;
+}linkedListData;
 
 typedef struct linkedList
 {
     struct linkedList *prev;
-    unsigned int data;
+    linkedListData data;
     struct linkedList *next;
 }linkedList;
 
@@ -20,14 +23,14 @@ typedef struct linkedList
  * input: the data of this node
  * output: a node contains data and Null links
  */
-linkedList* initLinkedList(unsigned int);
+linkedList* initLinkedList(linkedListData);
 
 /**
  * descreption: add a new node at the tail of a list
  * input: the list need to be added a node and the data of this node
  * output: void
  */
-void addNodeAtTail(linkedList*, unsigned int);
+void addNodeAtTail(linkedList*, linkedListData);
 
 /**
  * descreption: go to the end of this list
@@ -48,4 +51,11 @@ linkedList* toListHead(linkedList*);
  * input: a node in a list, and the searched data
  * output: 1 found / 0 failed
  */
-int checkDataInList(linkedList*, unsigned int);
+int checkDataInList(linkedList*, linkedListData);
+
+/**
+ * descreption: check two data is the same or not
+ * input: two data
+ * output: 1 equal / 0 not the same
+ */
+int nodeDataEqual(linkedListData, linkedListData);

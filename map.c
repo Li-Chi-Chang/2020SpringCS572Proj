@@ -332,9 +332,40 @@ int drawMaze(int locationX, int locationY, int isdelay)
             {
                 printf("  %1c  ", map[x][y].name);
             }
-            else
+            else if(ISPRINTNAME && map[x][y].name>='A' && map[x][y].name<='z')
             {
                 printf("  %1c  ", map[x][y].name);
+            }
+            else if(ISPRINTFORKNODE)
+            {
+                int way = 0;
+                if(map[x][y].north == GRID)
+                {
+                    way++;
+                }
+                if(map[x][y].west == GRID)
+                {
+                    way++;
+                }
+                if(map[x][y].east == GRID)
+                {
+                    way++;
+                }
+                if(map[x][y].south == GRID || map[x][y].south == ENTRY)//for A
+                {
+                    way++;
+                }
+
+                if(way == 3)
+                    printf("  $  ");
+                else
+                {
+                    printf("     ");
+                }
+            }
+            else
+            {
+                printf("     ");
             }
         }
         if(map[MAZEWIDTH - 1][y].east == WALL && !(mouseX == MAZEWIDTH - 1 && mouseY == y && mouseHead == EAST))
