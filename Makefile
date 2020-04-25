@@ -1,7 +1,7 @@
 all: bfs
-	gcc -o bfs obj/map.o obj/bfs.o obj/err.o obj/stack.o obj/linkedList.o -Wall
+	gcc -o bfs obj/map.o obj/bfs.o obj/err.o obj/stack.o obj/binaryTree.o -Wall
 
-bfs: bfs.c map stack linkedList
+bfs: bfs.c map stack binaryTree
 	gcc -c bfs.c -o obj/bfs.o -Wall
 
 stack: stack_C/stack.c stack_C/stack.h
@@ -9,10 +9,10 @@ stack: stack_C/stack.c stack_C/stack.h
 	cp stack.o obj/stack.o
 	rm stack.o
 
-linkedList: linkedList_C/linkedList.c linkedList_C/linkedList.h
-	gcc -c linkedList_C/linkedList.c -o linkedList.o -Wall
-	cp linkedList.o obj/linkedList.o
-	rm linkedList.o
+binaryTree: binaryTree_C/binaryTree.c binaryTree_C/binaryTree.h
+	gcc -c binaryTree_C/binaryTree.c -o binaryTree.o -Wall
+	cp binaryTree.o obj/binaryTree.o
+	rm binaryTree.o
 
 
 map: map.c map.h err

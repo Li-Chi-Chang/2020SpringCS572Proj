@@ -1,5 +1,12 @@
 {
     "files.associations": {
-        "linkedlist.h": "c"
+        "linkedlist.h": "c",
+        "stdlib.h": "c",
+        "binarytree.h": "c",
+        "stdio.h": "c",
+        "string.h": "c",
+        "array": "c",
+        "string": "c",
+        "vector": "c"
     }
 }

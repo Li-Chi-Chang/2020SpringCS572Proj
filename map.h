@@ -65,6 +65,9 @@ mapNode getNodeInfo();
 #define ISPRINTFORKNODE 1
 
 // delaying time
-//#define DELAYING 50000
-#define DELAYING 200000
+#define DELAYING 50000
+//#define DELAYING 200000
 #define WITHOUTDELAYING 0
+
+// is target is travel the map or not
+#define ISTRAVELALL 1

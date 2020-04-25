@@ -1,0 +1,378 @@
+init location: x:0, y:0
+data location: x:0, y:0
+
+in dfs
+nodeinfo:	X:0,Y:0
+Print Stack(2):
+base
+(0,0),dir:1
+(0,0),dir:0
+top
+pop	X:0,Y:0,Dir:0
+this node: x:0, y:0
+	parent: NULL
+	leftChild: NULL
+	rightChild: NULL
+in switch X: 0, Y: 16
+current north: 0, s: 0, w: 1, e :0
+getNodeInfo north: 0, s: 0, w: 1, e :0	 head: 0
+push	X:0,Y:16,Dir:1
+push	X:0,Y:16,Dir:0
+
+in dfs
+nodeinfo:	X:0,Y:16
+Print Stack(3):
+base
+(0,0),dir:1
+(0,16),dir:1
+(0,16),dir:0
+top
+pop	X:0,Y:16,Dir:0
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: NULL
+	rightChild: NULL
+in switch X: 9, Y: 18
+current north: 1, s: 0, w: 0, e :0
+getNodeInfo north: 1, s: 0, w: 0, e :0	 head: 0
+push	X:9,Y:18,Dir:1
+push	X:9,Y:18,Dir:3
+
+in dfs
+nodeinfo:	X:9,Y:18
+Print Stack(4):
+base
+(0,0),dir:1
+(0,16),dir:1
+(9,18),dir:1
+(9,18),dir:3
+top
+pop	X:9,Y:18,Dir:3
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: NULL
+	rightChild: NULL
+in switch X: 19, Y: 19
+current north: 2, s: 0, w: 0, e :1
+getNodeInfo north: 1, s: 0, w: 2, e :0	 head: 1
+push	X:19,Y:19,Dir:2
+
+in dfs
+nodeinfo:	X:19,Y:19
+Print Stack(4):
+base
+(0,0),dir:1
+(0,16),dir:1
+(9,18),dir:1
+(19,19),dir:2
+top
+pop	X:19,Y:19,Dir:2
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: (19,19)
+	rightChild: NULL
+this node: x:19, y:19
+	parent: (9,18)	 dir:3
+	leftChild: NULL
+	rightChild: NULL
+in switch X: 19, Y: 18
+current north: 0, s: 0, w: 0, e :1
+getNodeInfo north: 0, s: 0, w: 1, e :0	 head: 2
+push	X:19,Y:18,Dir:3
+push	X:19,Y:18,Dir:2
+
+in dfs
+nodeinfo:	X:19,Y:18
+Print Stack(5):
+base
+(0,0),dir:1
+(0,16),dir:1
+(9,18),dir:1
+(19,18),dir:3
+(19,18),dir:2
+top
+pop	X:19,Y:18,Dir:2
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: (19,19)
+	rightChild: NULL
+this node: x:19, y:19
+	parent: (9,18)	 dir:3
+	leftChild: (19,18)
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,19)	 dir:0
+	leftChild: NULL
+	rightChild: NULL
+
+in dfs
+nodeinfo:	X:19,Y:18
+Print Stack(4):
+base
+(0,0),dir:1
+(0,16),dir:1
+(9,18),dir:1
+(19,18),dir:3
+top
+pop	X:19,Y:18,Dir:3
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: (19,19)
+	rightChild: NULL
+this node: x:19, y:19
+	parent: (9,18)	 dir:3
+	leftChild: (19,18)
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,19)	 dir:0
+	leftChild: (98,98)
+	rightChild: NULL
+this node: x:98, y:98
+	parent: (19,18)	 dir:2
+	leftChild: NULL
+	rightChild: NULL
+in cross function
+
+in dfs
+nodeinfo:	X:19,Y:18
+Print Stack(3):
+base
+(0,0),dir:1
+(0,16),dir:1
+(9,18),dir:1
+top
+pop	X:9,Y:18,Dir:1
+stackinfo x:9 y:18
+pointer: x:19, y:18
+statement: 0
+in do while
+location x:19 y:18
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: (19,19)
+	rightChild: NULL
+	cross: (19,18)
+this node: x:19, y:19
+	parent: (9,18)	 dir:3
+	leftChild: (19,18)
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,19)	 dir:0
+	leftChild: (98,98)
+	rightChild: NULL
+	cross: (9,18)
+this node: x:98, y:98
+	parent: (19,18)	 dir:2
+	leftChild: NULL
+	rightChild: NULL
+parentDir: 0
+in do while
+location x:19 y:19
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: (19,19)
+	rightChild: NULL
+	cross: (19,18)
+this node: x:19, y:19
+	parent: (9,18)	 dir:3
+	leftChild: (19,18)
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,19)	 dir:0
+	leftChild: (98,98)
+	rightChild: NULL
+	cross: (9,18)
+this node: x:98, y:98
+	parent: (19,18)	 dir:2
+	leftChild: NULL
+	rightChild: NULL
+parentDir: 3
+out of while
+location x:9 y:18
+add node at right
+in switch1 X: 19, Y: 18
+current north: 0, s: 0, w: 0, e :1
+getNodeInfo north: 1, s: 0, w: 0, e :0	 head: 1
+push	X:19,Y:18,Dir:0
+push	X:19,Y:18,Dir:2
+
+in dfs
+nodeinfo:	X:19,Y:18
+Print Stack(4):
+base
+(0,0),dir:1
+(0,16),dir:1
+(19,18),dir:0
+(19,18),dir:2
+top
+pop	X:19,Y:18,Dir:2
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: (19,19)
+	rightChild: NULL
+	cross: (19,18)
+this node: x:19, y:19
+	parent: (9,18)	 dir:3
+	leftChild: (19,18)
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,19)	 dir:0
+	leftChild: (98,98)
+	rightChild: (19,18)
+	cross: (9,18)
+this node: x:98, y:98
+	parent: (19,18)	 dir:2
+	leftChild: NULL
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,18)	 dir:3
+	leftChild: NULL
+	rightChild: NULL
+hit cross and return!
+
+in dfs
+nodeinfo:	X:19,Y:18
+Print Stack(3):
+base
+(0,0),dir:1
+(0,16),dir:1
+(19,18),dir:0
+top
+pop	X:19,Y:18,Dir:0
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: (19,19)
+	rightChild: NULL
+	cross: (19,18)
+this node: x:19, y:19
+	parent: (9,18)	 dir:3
+	leftChild: (19,18)
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,19)	 dir:0
+	leftChild: (98,98)
+	rightChild: (19,18)
+	cross: (9,18)
+this node: x:98, y:98
+	parent: (19,18)	 dir:2
+	leftChild: NULL
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,18)	 dir:3
+	leftChild: NULL
+	rightChild: NULL
+in cross function
+
+in dfs
+nodeinfo:	X:19,Y:18
+Print Stack(2):
+base
+(0,0),dir:1
+(0,16),dir:1
+top
+pop	X:0,Y:16,Dir:1
+stackinfo x:0 y:16
+pointer: x:19, y:18
+statement: 0
+in do while
+location x:19 y:18
+this node: x:0, y:0
+	parent: NULL
+	leftChild: (0,16)
+	rightChild: NULL
+this node: x:0, y:16
+	parent: (0,0)	 dir:2
+	leftChild: (9,18)
+	rightChild: NULL
+this node: x:9, y:18
+	parent: (0,16)	 dir:2
+	leftChild: (19,19)
+	rightChild: NULL
+	cross: (19,18)
+this node: x:19, y:19
+	parent: (9,18)	 dir:3
+	leftChild: (19,18)
+	rightChild: NULL
+	cross: (19,18)
+this node: x:19, y:18
+	parent: (19,19)	 dir:0
+	leftChild: (98,98)
+	rightChild: (19,18)
+	cross: (19,19)
+this node: x:98, y:98
+	parent: (19,18)	 dir:2
+	leftChild: NULL
+	rightChild: NULL
+this node: x:19, y:18
+	parent: (19,18)	 dir:3
+	leftChild: NULL
+	rightChild: NULL
+parentDir: 3

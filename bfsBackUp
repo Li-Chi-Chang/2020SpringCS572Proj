@@ -1,0 +1,440 @@
+#include "map.h"
+#include "stack_C/stack.h"
+#include "linkedList_C/linkedList.h"
+#include "binaryTree_C/binaryTree.h"
+
+//basic actions
+void turn(char);//turn a direction
+void go();//go forward one step
+mapNode getRealDirection(mapNode, int);
+
+//advenced actions
+int goToNextBranch();//go stregth to next fork node
+void chooseNextWay();//choose a way to go at a fork node
+void faceTo(int);//face to one of NEWS
+int findNodeWithDfsWithLocation(binaryTree*, binaryTreeData);
+int getBottom(int);
+
+//algo
+void dfs();
+
+//others
+void init();
+binaryTreeData initTreeData();
+
+char mousehead = NORTH;
+int location[2] = {0,0};// 1:x 0:y
+binaryTree* root;
+stackBase* base;
+
+#define HEIGHT 0
+#define WIDTH 1
+
+#define UNDEFINE 99
+#define ENTRYWAY 100
+#define HITWALL 98
+#define TRAVELED 3
+
+int main(void)
+{
+    // must init first
+    init();
+    // do the bfs algo
+    mapNode current = getRealDirection(getNodeInfo(),mousehead);
+    stackData data;
+    data.locationX = location[WIDTH];
+    data.locationY = location[HEIGHT];
+    switch(current.east)
+    {
+    case GRID:
+        data.travelDir = EAST;
+        push(base,data);
+        break;
+    }
+    switch(current.west)
+    {
+    case GRID:
+        data.travelDir = WEST;
+        push(base,data);
+        break;
+    }
+    switch(current.north)
+    {
+    case GRID:
+        data.travelDir = NORTH;
+        push(base,data);
+        break;
+    }
+    switch(current.south)
+    {
+    case GRID:
+        data.travelDir = SOUTH;
+        push(base,data);
+        break;
+    }
+    dfs(location[WIDTH],location[HEIGHT],NORTH);
+    return 0;
+}
+
+void init()
+{
+    // init
+    readMaze();
+    initErrLog();
+    binaryTreeData data = initTreeData();
+    root = initTreeNode(data);
+    base = initStackBase();
+}
+
+
+void dfs(int parentX, int parentY, int exitDir)
+{
+    //used in switch
+    binaryTree* Realroot;
+    binaryTreeData locationData;
+
+    mapNode current = getRealDirection(getNodeInfo(),mousehead);
+    int currentLocation[2] = {location[0],location[1]};
+    //pop a node from stack
+    stackData data = pop(base);
+    faceTo(data.travelDir);
+    go();
+    int result = goToNextBranch();
+    switch (result)
+    {
+    case HITWALL:
+        turn(LEFT);
+        turn(LEFT);
+        goToNextBranch();
+        //record this node hit wall to tree
+        break;
+    case 0:
+    case 1:
+        //if go to the road, set the path to stack and tree
+        //record this node connect to other node to tree
+        Realroot = toTreeRoot(root);
+        locationData = initTreeData();
+        locationData.location[WIDTH] = location[WIDTH];
+        locationData.location[HEIGHT] = location[HEIGHT];
+        if(findNodeWithDfsWithLocation(Realroot,locationData))
+        {
+            //if the node is searched?
+            dfs(currentLocation[WIDTH],currentLocation[HEIGHT],EAST);
+        }
+        else if(root->leftChild == NULL)
+        {
+            binaryTreeData data = initTreeData();
+            data.location[WIDTH] = location[WIDTH];
+            data.location[HEIGHT] = location[HEIGHT];
+            data.parentX = currentLocation[WIDTH];
+            data.parentY = currentLocation[HEIGHT];
+            data.parentDir = getBottom(mousehead);
+            root->leftChild = initTreeNode(data);
+            root = root->leftChild;
+            stackData stackdata;
+            mapNode childNode = getRealDirection(getNodeInfo(),mousehead);
+            switch(childNode.east)
+            {
+            case GRID:
+                if(data.parentDir == EAST)
+                    break;
+                stackdata.travelDir = EAST;
+                push(base,stackdata);
+                break;
+            }
+            switch(childNode.west)
+            {
+            case GRID:
+                if(data.parentDir == WEST)
+                    break;
+                stackdata.travelDir = WEST;
+                push(base,stackdata);
+                break;
+            }
+            switch(childNode.north)
+            {
+            case GRID:
+                if(data.parentDir == NORTH)
+                    break;
+                stackdata.travelDir = NORTH;
+                push(base,stackdata);
+                break;
+            }
+            switch(childNode.south)
+            {
+            case GRID:
+                if(data.parentDir == SOUTH)
+                    break;
+                stackdata.travelDir = SOUTH;
+                push(base,stackdata);
+                break;
+            }
+        }
+        dfs(currentLocation[WIDTH],currentLocation[HEIGHT],EAST);
+        break;
+    default:
+        printf("ERR\n");
+        exit(1);
+        break;
+    }
+}
+
+/**
+ * return 0 go to a normal node
+ * return 1 hit the entry
+ * algo: go until meet branch
+ * If meet a brach, go the right side
+ * using the bfs algo
+ * */
+int goToNextBranch()
+{
+    mapNode current = getNodeInfo();
+    int way = 0;
+    if(current.north == GRID)
+    {
+        way++;
+    }
+    if(current.west == GRID)
+    {
+        way++;
+    }
+    if(current.east == GRID)
+    {
+        way++;
+    }
+    
+    switch (way)
+    {
+    case 0:
+        //hit a wall
+        //back to previous branch
+        return HITWALL;
+        break;
+    case 1:
+        if(current.north == GRID)
+            ;
+        else if(current.east == GRID)
+        {
+            turn(RIGHT);
+        }
+        else if(current.west == GRID)
+        {
+            turn(LEFT);
+        }
+        go();
+        return goToNextBranch();
+    case 2:
+        return 0;
+    }
+
+    if(current.north == ENTRY)
+        ;
+    if(current.west == ENTRY)
+    {
+        turn(LEFT);
+    }
+    if(current.east == ENTRY)
+    {
+        turn(RIGHT);
+    }
+    return 1;
+}
+
+void turn(char dir)
+{
+    int head = mousehead;
+    switch (dir)
+    {
+    case RIGHT:
+        head++;
+        if(head > WEST)
+        {
+            head = NORTH;
+        }
+        break;
+    case LEFT:
+        head--;
+        if(head < NORTH)
+        {
+            head = WEST;
+        }
+        break;
+    }
+
+    mousehead = head;
+    rotate(dir);
+}
+
+void go()
+{
+    switch (mousehead)
+    {
+    case NORTH:
+        location[HEIGHT]++;
+        break;
+    case SOUTH:
+        location[HEIGHT]--;
+        break;
+    case EAST:
+        location[WIDTH]++;
+        break;
+    case WEST:
+        location[WIDTH]--;
+        break;
+    }
+
+    goNext();
+}
+
+void chooseNextWay()
+{
+    mapNode RealDir = getRealDirection(getNodeInfo(),mousehead);
+    
+    char dir[4] = {RealDir.north,RealDir.south,RealDir.east,RealDir.west};//north,south,east,west
+    int i;
+    for(i = 0; i < 4; i++)
+    {
+        if(dir[i] == GRID)
+        {
+            switch (i)
+            {
+            case 0:
+                faceTo(NORTH);
+                break;
+            case 1:
+                faceTo(SOUTH);
+                break;
+            case 2:
+                faceTo(EAST);
+                break;
+            case 3:
+                faceTo(WEST);
+                break;
+            default:
+                break;
+            }
+            go();
+            goToNextBranch();
+            return;
+        }
+    }
+}
+
+void faceTo(int dir)
+{
+    int rL = ((mousehead - dir)+4) % 4;
+    
+    switch (rL)
+    {
+    case 1:
+        turn(LEFT);
+        break;
+    case 3:
+        turn(RIGHT);
+        break;
+    case 2:
+        turn(LEFT);
+        turn(LEFT);
+        break;
+    default:
+        break;
+    }
+}
+
+mapNode getRealDirection(mapNode fromMouseView, int head)
+{
+    mapNode RealDir;
+    switch (head)
+    {
+    case NORTH:
+        RealDir.north = fromMouseView.north;
+        RealDir.south = fromMouseView.south;
+        RealDir.east = fromMouseView.east;
+        RealDir.west = fromMouseView.west;
+        break;
+    case SOUTH:
+        RealDir.north = fromMouseView.south;
+        RealDir.south = fromMouseView.north;
+        RealDir.east = fromMouseView.west;
+        RealDir.west = fromMouseView.east;
+        break;
+    case WEST:
+        RealDir.north = fromMouseView.west;
+        RealDir.south = fromMouseView.east;
+        RealDir.east = fromMouseView.north;
+        RealDir.west = fromMouseView.south;
+        break;
+    case EAST:
+        RealDir.north = fromMouseView.east;
+        RealDir.south = fromMouseView.west;
+        RealDir.east = fromMouseView.south;
+        RealDir.west = fromMouseView.north;
+        break;
+    }
+    return RealDir;
+}
+
+binaryTreeData initTreeData()
+{
+    binaryTreeData data;
+    data.parentX = UNDEFINE;
+    data.parentY = UNDEFINE;
+    data.parentDir = UNDEFINE;
+    data.leftChildX = UNDEFINE;
+    data.leftChildY = UNDEFINE;
+    data.leftChildDir = UNDEFINE;
+    data.rightChildX = UNDEFINE;
+    data.rightChildY = UNDEFINE;
+    data.rightChildDir = UNDEFINE;
+    return data;
+}
+
+int findNodeWithDfsWithLocation(binaryTree* root, binaryTreeData data)
+{
+    int returnInt[2];
+    binaryTree* nextLevel;
+    if(root->data.location[0] == data.location[0] && root->data.location[1] == data.location[1])
+    {
+        return 1;
+    }
+    else if(root->leftChild == NULL && root->rightChild == NULL)
+    {
+        return 0;
+    }
+    if(root->leftChild != NULL)
+    {
+        nextLevel = root->leftChild;
+        returnInt[0] = findNodeWithDfsWithLocation(root->leftChild, data);
+        if(returnInt[0])
+        {
+            root = nextLevel;
+            return returnInt[0];
+        }
+    }
+    if(root->rightChild != NULL)
+    {
+        nextLevel = root->rightChild;
+        returnInt[1] =  findNodeWithDfsWithLocation(root->rightChild, data);
+        if(returnInt[1])
+        {
+            root = nextLevel;
+            return returnInt[1];
+        }
+    }
+    return 0;
+}
+
+int getBottom(int head)
+{
+    switch (head)
+    {
+    case NORTH:
+        return SOUTH;
+    case SOUTH:
+        return NORTH;
+    case EAST:
+        return WEST;
+    case WEST:
+        return EAST;
+    }
+}
