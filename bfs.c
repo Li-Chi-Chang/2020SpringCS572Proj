@@ -13,6 +13,8 @@ int goToNextBranch();//go stregth to next fork node
 void faceTo(int);//face to one of NEWS
 binaryTree* findNodeWithDfsWithLocation(binaryTree*, binaryTreeData);//input pointer, data, return pointer
 int getBottom(int);
+void goToDest(binaryTree*, binaryTree*);//from this node to other node in tree, second input is the path
+int goToDestAlgo(binaryTree*, binaryTreeData, binaryTree*);//the third input is an output
 
 //algo
 void dfs();
@@ -27,6 +29,10 @@ binaryTreeData initTreeData();
  */
 int printTreeText(binaryTree*,int);
 void printStackText(stackBase*);
+stackData popWithText(stackBase*);
+int pushWithText(stackBase*, stackData);
+void printCurrentNode(mapNode, int);
+
 
 
 char mousehead = NORTH;
@@ -56,36 +62,33 @@ int main(void)
     data.locationX = location[WIDTH];
     data.locationY = location[HEIGHT];
 
-    sprintf(string, "init location: x:%d, y:%d", location[WIDTH],location[HEIGHT]);
-    logFile(string);
-    sprintf(string, "data location: x:%d, y:%d", data.locationX,data.locationY);
-    logFile(string);
+    printCurrentNode(getNodeInfo(),mousehead);
     switch(current.east)
     {
     case GRID:
         data.travelDir = EAST;
-        push(stack,data);
+        pushWithText(stack,data);
         break;
     }
     switch(current.west)
     {
     case GRID:
         data.travelDir = WEST;
-        push(stack,data);
+        pushWithText(stack,data);
         break;
     }
     switch(current.north)
     {
     case GRID:
         data.travelDir = NORTH;
-        push(stack,data);
+        pushWithText(stack,data);
         break;
     }
     switch(current.south)
     {
     case GRID:
         data.travelDir = SOUTH;
-        push(stack,data);
+        pushWithText(stack,data);
         break;
     }
     tree->data.location[WIDTH] = location[WIDTH];
@@ -100,7 +103,7 @@ void init()
     // init
     readMaze();
     initErrLog();
-    binaryTreeData data = initTreeData();
+    binaryTreeData data = initTreeData(location[WIDTH],location[HEIGHT]);
     tree = initTreeNode(data);
     stack = initStackBase();
 }
@@ -108,399 +111,142 @@ void init()
 
 void dfs(int parentX, int parentY, int exitDir)
 {
-    if(tree->data.location[WIDTH] != location[WIDTH] || tree->data.location[HEIGHT] != location[HEIGHT])
+    //tree pointer needs to be place at the current node
+    logFile("DFS function");
+    if(!getStackLen(stack))
     {
-        printf("tree->data.location[WIDTH]:%d, location[WIDTH]:%d\ntree->data.location[HEIGHT]:%d, location[HEIGHT]:%d\n",tree->data.location[WIDTH],location[WIDTH], tree->data.location[HEIGHT], location[HEIGHT]);
-        printTreeText(toTreeRoot(tree),1);
-        err(COMMANDNOTFOUND);
+        logFile("Finish map search");
+        exit(1);
     }
-        
-
-    logFile("\nin dfs");
-    sprintf(string,"nodeinfo:\tX:%d,Y:%d",location[WIDTH],location[HEIGHT]);
-    logFile(string);
-    printStackText(stack);
-
-    //if the stack is empty, finish traveling
-    if(getStackLen(stack) == 0)
-        return;
-    stackData stackinfo = pop(stack);
-    sprintf(string,"pop\tX:%d,Y:%d,Dir:%d",stackinfo.locationX,stackinfo.locationY,stackinfo.travelDir);
-    logFile(string);
-
-    //if the target node is the current node, operate the command in stack
-    if(location[WIDTH] == stackinfo.locationX && stackinfo.locationY == location[HEIGHT])
+    stackData stackinfo =  popWithText(stack);
+    printCurrentNode(getNodeInfo(),mousehead);
+    printTreeText(toTreeRoot(tree),1);
+    //check the path is searched or not
+    binaryTree* pointer = findNodeWithDfsWithLocation(toTreeRoot(tree),initTreeData(location[WIDTH],location[HEIGHT]));
+    //if exist, check the path is searched
+    if((pointer->data.crossDir == stackinfo.travelDir || pointer->data.leftChildDir == stackinfo.travelDir || pointer->data.rightChildDir == stackinfo.travelDir || pointer->data.parentDir == stackinfo.travelDir) && pointer->data.location[WIDTH] == stackinfo.locationX && pointer->data.location[HEIGHT] == stackinfo.locationY)
     {
-        binaryTree *pointer = toTreeRoot(tree);
-        binaryTreeData treedata = initTreeData();
-        treedata.location[WIDTH] = location[WIDTH];
-        treedata.location[HEIGHT] = location[HEIGHT];
-        printTreeText(toTreeRoot(tree),1);
-        //if we can find this node in tree, it means that it is searched
-        if(findNodeWithDfsWithLocation(pointer,treedata) != NULL)
-        {
-            pointer = findNodeWithDfsWithLocation(pointer,treedata);
-            if(pointer->cross != NULL)
-            {
-                //if the path will go is the cross path, dont go, or you will fall in to a loop
-                if(pointer->data.crossDir == stackinfo.travelDir)
-                {
-                    logFile("hit cross and return!");
-                    dfs(location[WIDTH],location[HEIGHT],mousehead);
-                }
-            }
-            faceTo(stackinfo.travelDir);
-            go();
-            int result = goToNextBranch();
-            switch (result)
-            {
-            case HITWALL:
-                //hit a wall, so back to original node
-                turn(LEFT);
-                turn(LEFT);
-                goToNextBranch();
-                if(pointer->leftChild == NULL)
-                {
-                    treedata.parentDir = getBottom(mousehead);
-                    treedata.parentX = parentX;
-                    treedata.parentY = parentY;
-                    pointer->leftChild = initTreeNode(treedata);
-                    pointer->leftChild->parent = pointer;
-                    pointer->leftChild->data.location[WIDTH] = HITWALL;
-                    pointer->leftChild->data.location[HEIGHT] = HITWALL;
-                    pointer->data.leftChildX = HITWALL;
-                    pointer->data.leftChildY = HITWALL;
-                    pointer->data.leftChildDir = exitDir;
-                }
-                else
-                {
-                    treedata.parentDir = getBottom(mousehead);
-                    treedata.parentX = parentX;
-                    treedata.parentY = parentY;
-                    pointer->rightChild = initTreeNode(treedata);
-                    pointer->rightChild->parent = pointer;
-                    pointer->rightChild->data.location[WIDTH] = HITWALL;
-                    pointer->rightChild->data.location[HEIGHT] = HITWALL;
-                    pointer->data.rightChildX = HITWALL;
-                    pointer->data.rightChildY = HITWALL;
-                    pointer->data.rightChildDir = exitDir;
-                }
-                dfs(location[WIDTH],location[HEIGHT],getBottom(mousehead));
-                break;
-            case 1:
-            case 0:
-                if(1)
-                {
-                    //need to check if this node in tree, if yes, add this node to cross
-                    binaryTreeData data = initTreeData();
-                    data.location[WIDTH] = location[WIDTH];
-                    data.location[HEIGHT] = location[HEIGHT];
-                    if(findNodeWithDfsWithLocation(toTreeRoot(tree),data)!=NULL)
-                    {
-                        logFile("in cross function");
-                        binaryTree *existNode = findNodeWithDfsWithLocation(toTreeRoot(tree),data);
-                        if(existNode->cross!=NULL && existNode->cross != pointer)
-                        {
-                            logFile("Cross number is not enough!!!!");
-                            exit(1);
-                        }
-                        // meet the same cross from the other side
-                        else if(existNode->cross!=NULL && existNode->cross == pointer)
-                        {
-                            logFile("meet the same cross from the other side");
-                            pointer = pointer->cross;
-                            tree = pointer;
-                            dfs(location[WIDTH],location[HEIGHT],mousehead);
-                            break;
-                        }
-                        existNode->cross = pointer;
-                        pointer->cross = existNode;
-                        existNode->data.crossX = pointer->data.location[WIDTH];
-                        existNode->data.crossY = pointer->data.location[HEIGHT];
-                        existNode->data.crossDir = getBottom(mousehead);
-                        pointer->data.crossX = existNode->data.location[WIDTH];
-                        pointer->data.crossY = existNode->data.location[HEIGHT];
-                        pointer->data.crossDir = exitDir;
-                        turn(LEFT);
-                        turn(LEFT);
-                        go();
-                        goToNextBranch();
-                        dfs(location[WIDTH],location[HEIGHT],mousehead);
-                        break;
-                    }
-                }
-                if(tree->leftChild == NULL)
-                {
-                    treedata.parentDir = getBottom(mousehead);
-                    treedata.parentX = parentX;
-                    treedata.parentY = parentY;
-                    pointer->leftChild = initTreeNode(treedata);
-                    pointer->leftChild->parent = pointer;
-                    pointer->leftChild->data.location[WIDTH] = location[WIDTH];
-                    pointer->leftChild->data.location[HEIGHT] = location[HEIGHT];
-                    pointer->data.leftChildDir = exitDir;
-                    pointer->data.leftChildX = location[WIDTH];
-                    pointer->data.leftChildY = location[HEIGHT];
-                    tree = pointer->leftChild;
-                    pointer = pointer->leftChild;
-                }
-                else if(tree->rightChild == NULL)
-                {
-                    treedata.parentDir = getBottom(mousehead);
-                    treedata.parentX = parentX;
-                    treedata.parentY = parentY;
-                    pointer->rightChild = initTreeNode(treedata);
-                    pointer->rightChild->parent = pointer;
-                    pointer->rightChild->data.location[WIDTH] = location[WIDTH];
-                    pointer->rightChild->data.location[HEIGHT] = location[HEIGHT];
-                    pointer->data.rightChildDir = exitDir;
-                    pointer->data.rightChildX = location[WIDTH];
-                    pointer->data.rightChildY = location[HEIGHT];
-                    tree = pointer->rightChild;
-                    pointer = pointer->rightChild;
-                }
-                // if we find a node with 0 empty child branch
-                else
-                {
-                    printf("meet here\n");
-                    exit(1);
-                }
-                if(1)
-                {
-                    mapNode current = getRealDirection(getNodeInfo(),mousehead);
-                    stackData data;
-                    data.locationX = location[WIDTH];
-                    data.locationY = location[HEIGHT];
-                    sprintf(string,"in switch X: %d, Y: %d",location[WIDTH],location[HEIGHT]);
-                    logFile(string);
-                    sprintf(string,"current north: %d, s: %d, w: %d, e :%d",current.north,current.south,current.west,current.east);
-                    logFile(string);
-                    sprintf(string,"getNodeInfo north: %d, s: %d, w: %d, e :%d\t head: %d",getNodeInfo().north,getNodeInfo().south,getNodeInfo().west,getNodeInfo().east,mousehead);
-                    logFile(string);
-                    switch(current.east)
-                    {
-                    case GRID:
-                        if(pointer->data.parentDir == EAST || pointer->data.rightChildDir == EAST || pointer->data.leftChildDir == EAST)
-                            break;
-                        data.travelDir = EAST;
-                        push(stack,data);
-                        sprintf(string,"push\tX:%d,Y:%d,Dir:%d",data.locationX,data.locationY,data.travelDir);
-                        logFile(string);
-                        break;
-                    }
-                    switch(current.west)
-                    {
-                    case GRID:
-                        if(pointer->data.parentDir == WEST || pointer->data.rightChildDir == WEST || pointer->data.leftChildDir == WEST)
-                            break;
-                        data.travelDir = WEST;
-                        push(stack,data);
-                        sprintf(string,"push\tX:%d,Y:%d,Dir:%d",data.locationX,data.locationY,data.travelDir);
-                        logFile(string);
-                        break;
-                    }
-                    switch(current.north)
-                    {
-                    case GRID:
-                        if(pointer->data.parentDir == NORTH || pointer->data.rightChildDir == NORTH || pointer->data.leftChildDir == NORTH)
-                            break;
-                        data.travelDir = NORTH;
-                        push(stack,data);
-                        sprintf(string,"push\tX:%d,Y:%d,Dir:%d",data.locationX,data.locationY,data.travelDir);
-                        logFile(string);
-                        break;
-                    }
-                    switch(current.south)
-                    {
-                    case GRID:
-                        if(pointer->data.parentDir == SOUTH || pointer->data.rightChildDir == SOUTH || pointer->data.leftChildDir == SOUTH)
-                            break;
-                        data.travelDir = SOUTH;
-                        push(stack,data);
-                        sprintf(string,"push\tX:%d,Y:%d,Dir:%d",data.locationX,data.locationY,data.travelDir);
-                        logFile(string);
-                        break;
-                    }
-                    dfs(location[WIDTH],location[HEIGHT],getBottom(mousehead));
-                }
-            }
-        }
-        //if we can not find this node in tree, it means that we can build a node for it
-        else
-        {
-            //not possible here
-        }
+        //do nothing
+        logFile("This path is searched");
     }
+    //if the path is not searched
     else
     {
-        //if the node is not the node in pop, back to that node
-        binaryTree* pointer = tree;
-        binaryTreeData treedata = initTreeData();
-        treedata.location[WIDTH] = stackinfo.locationX;
-        treedata.location[HEIGHT] = stackinfo.locationY;
-        int trueorNot = findNodeWithDfsWithLocation(pointer,treedata)!=NULL;
-        sprintf(string, "stackinfo x:%d y:%d\npointer: x:%d, y:%d\nstatement: %d",stackinfo.locationX,stackinfo.locationY, pointer->data.location[WIDTH],pointer->data.location[HEIGHT], trueorNot);
-        logFile(string);
-        do
+        //make sure we are in the node
+        if(tree->data.location[WIDTH] == stackinfo.locationX && tree->data.location[HEIGHT] == stackinfo.locationY)
         {
-            logFile("in do while");
-            sprintf(string, "location x:%d y:%d",location[WIDTH],location[HEIGHT]);
-            logFile(string);
-            printTreeText(toTreeRoot(tree),1);
-            faceTo(pointer->data.parentDir);
-            sprintf(string, "parentDir: %d",pointer->data.parentDir);
-            logFile(string);
+            faceTo(stackinfo.travelDir);
             go();
             goToNextBranch();
-            pointer = pointer->parent;
-        }while(findNodeWithDfsWithLocation(pointer,treedata) == NULL && (pointer->data.location[WIDTH] != stackinfo.locationX || pointer->data.location[HEIGHT] != stackinfo.locationY));
-        logFile("out of while");
-        sprintf(string, "location x:%d y:%d",location[WIDTH],location[HEIGHT]);
-        logFile(string);
-        if(pointer==NULL)
-        {
-            err(COMMANDNOTFOUND);
-        }
-        faceTo(stackinfo.travelDir);
-        go();
-        int result = goToNextBranch();
-        pointer = tree;
-        switch (result)
-        {
-        case HITWALL:
-            //hit a wall, so back to original node
-            turn(LEFT);
-            turn(LEFT);
-            goToNextBranch();
-            if(pointer->leftChild == NULL)
+            //check if the node is not in the tree
+            if(findNodeWithDfsWithLocation(toTreeRoot(tree),initTreeData(location[WIDTH],location[HEIGHT])) == NULL)
             {
-                treedata.parentDir = getBottom(mousehead);
-                treedata.parentX = parentX;
-                treedata.parentY = parentY;
-                pointer->leftChild = initTreeNode(treedata);
-                pointer->leftChild->parent = pointer;
-                pointer->leftChild->data.location[WIDTH] = HITWALL;
-                pointer->leftChild->data.location[HEIGHT] = HITWALL;
-                pointer->data.leftChildX = HITWALL;
-                pointer->data.leftChildY = HITWALL;
-                pointer->data.leftChildDir = exitDir;
-                tree = pointer;
-            }
-            else
-            {
-                treedata.parentDir = getBottom(mousehead);
-                treedata.parentX = parentX;
-                treedata.parentY = parentY;
-                pointer->rightChild = initTreeNode(treedata);
-                pointer->rightChild->parent = pointer;
-                pointer->rightChild->data.location[WIDTH] = HITWALL;
-                pointer->rightChild->data.location[HEIGHT] = HITWALL;
-                pointer->data.rightChildX = HITWALL;
-                pointer->data.rightChildY = HITWALL;
-                pointer->data.rightChildDir = exitDir;
-                tree = pointer;
-            }
-            break;
-        case 1:
-            //if i hit an entry
-            if(!ISTRAVELALL)
-            {
-
-            }
-        case 0:
-            if(tree->leftChild == NULL)
-            {
-                logFile("add node at left");
-                treedata.parentDir = getBottom(mousehead);
-                treedata.parentX = parentX;
-                treedata.parentY = parentY;
-                pointer->leftChild = initTreeNode(treedata);
-                pointer->leftChild->parent = pointer;
-                pointer->leftChild->data.location[WIDTH] = location[WIDTH];
-                pointer->leftChild->data.location[HEIGHT] = location[HEIGHT];
-                pointer->data.leftChildX = location[WIDTH];
-                pointer->data.leftChildY = location[HEIGHT];
-                pointer->data.leftChildDir = exitDir;
-                tree = pointer->leftChild;
-                pointer = tree;
-            }
-            else
-            {
-                logFile("add node at right");
-                treedata.parentDir = getBottom(mousehead);
-                treedata.parentX = parentX;
-                treedata.parentY = parentY;
-                pointer->rightChild = initTreeNode(treedata);
-                pointer->rightChild->parent = pointer;
-                pointer->rightChild->data.location[WIDTH] = location[WIDTH];
-                pointer->rightChild->data.location[HEIGHT] = location[HEIGHT];
-                pointer->data.rightChildX = location[WIDTH];
-                pointer->data.rightChildY = location[HEIGHT];
-                pointer->data.rightChildDir = exitDir;
-                tree = pointer->rightChild;
-                pointer = tree;
-            }
-            if(1)
-            {
+                if(tree->leftChild != NULL && tree->rightChild != NULL)
+                {
+                    logFile("out of children number!");
+                    exit(1);
+                }
+                //init a tree node
+                binaryTree* newNode = initTreeNode(initTreeData(location[WIDTH],location[HEIGHT]));
+                newNode->data.parentDir = getBottom(mousehead);
+                newNode->data.parentX = tree->data.location[WIDTH];
+                newNode->data.parentY = tree->data.location[HEIGHT];
+                newNode->parent = tree;
+                if(tree->leftChild == NULL)
+                {
+                    tree->leftChild = newNode;
+                    tree->data.leftChildDir = stackinfo.travelDir;
+                    tree->data.leftChildX = newNode->data.location[WIDTH];
+                    tree->data.leftChildY = newNode->data.location[HEIGHT];
+                }
+                else
+                {
+                    tree->rightChild = newNode;
+                    tree->data.rightChildDir = stackinfo.travelDir;
+                    tree->data.rightChildX = newNode->data.location[WIDTH];
+                }
+                //set the pointer to current node
+                tree = newNode;
+                //push the unsearched path to stack
                 mapNode current = getRealDirection(getNodeInfo(),mousehead);
+
                 stackData data;
                 data.locationX = location[WIDTH];
                 data.locationY = location[HEIGHT];
-                sprintf(string,"in switch1 X: %d, Y: %d",location[WIDTH],location[HEIGHT]);
-                logFile(string);
-                sprintf(string,"current north: %d, s: %d, w: %d, e :%d",current.north,current.south,current.west,current.east);
-                logFile(string);
-                sprintf(string,"getNodeInfo north: %d, s: %d, w: %d, e :%d\t head: %d",getNodeInfo().north,getNodeInfo().south,getNodeInfo().west,getNodeInfo().east,mousehead);
-                logFile(string);
-                switch(current.east)
+                if(current.south == GRID && tree->data.parentDir != SOUTH)
                 {
-                case GRID:
-                    if(pointer->data.parentDir == EAST || pointer->data.rightChildDir == EAST || pointer->data.leftChildDir == EAST)
-                        break;
-                    data.travelDir = EAST;
-                    push(stack,data);
-                    sprintf(string,"push\tX:%d,Y:%d,Dir:%d",data.locationX,data.locationY,data.travelDir);
-                    logFile(string);
-                    break;
-                }
-                switch(current.west)
-                {
-                case GRID:
-                    if(pointer->data.parentDir == WEST || pointer->data.rightChildDir == WEST || pointer->data.leftChildDir == WEST)
-                        break;
-                    data.travelDir = WEST;
-                    push(stack,data);
-                    sprintf(string,"push\tX:%d,Y:%d,Dir:%d",data.locationX,data.locationY,data.travelDir);
-                    logFile(string);
-                    break;
-                }
-                switch(current.north)
-                {
-                case GRID:
-                    if(pointer->data.parentDir == NORTH || pointer->data.rightChildDir == NORTH || pointer->data.leftChildDir == NORTH)
-                        break;
-                    data.travelDir = NORTH;
-                    push(stack,data);
-                    sprintf(string,"push\tX:%d,Y:%d,Dir:%d",data.locationX,data.locationY,data.travelDir);
-                    logFile(string);
-                    break;
-                }
-                switch(current.south)
-                {
-                case GRID:
-                    if(pointer->data.parentDir == SOUTH || pointer->data.rightChildDir == SOUTH || pointer->data.leftChildDir == SOUTH)
-                        break;
                     data.travelDir = SOUTH;
-                    push(stack,data);
-                    sprintf(string,"push\tX:%d,Y:%d,Dir:%d",data.locationX,data.locationY,data.travelDir);
-                    logFile(string);
-                    break;
+                    pushWithText(stack,data);
                 }
-                dfs(location[WIDTH],location[HEIGHT],getBottom(mousehead));
+                if(current.west == GRID && tree->data.parentDir != WEST)
+                {
+                    data.travelDir = WEST;
+                    pushWithText(stack,data);
+                }
+                if(current.east == GRID && tree->data.parentDir != EAST)
+                {
+                    data.travelDir = EAST;
+                    pushWithText(stack,data);
+                }
+                if(current.north == GRID && tree->data.parentDir != NORTH)
+                {
+                    data.travelDir = NORTH;
+                    pushWithText(stack,data);
+                }
+            }
+            //if the node is in the tree
+            else
+            {
+                binaryTree* crossPointer = findNodeWithDfsWithLocation(toTreeRoot(tree),initTreeData(location[WIDTH],location[HEIGHT]));
+                //if the cross is not empty
+                if(tree->cross != NULL)
+                {
+                    logFile("out of corss number!");
+                    exit(1);
+                }
+                //if the cross is empty
+                else
+                {
+                    //data at tree side
+                    tree->cross = crossPointer;
+                    tree->data.crossDir = stackinfo.travelDir;
+                    tree->data.crossX = crossPointer->data.location[WIDTH];
+                    tree->data.crossY = crossPointer->data.location[HEIGHT];
+                    //data at cross side
+                    crossPointer->cross = tree;
+                    crossPointer->data.crossDir = getBottom(mousehead);
+                    crossPointer->data.crossX = tree->data.location[WIDTH];
+                    crossPointer->data.crossY = tree->data.location[HEIGHT];
+                    //set the tree location to crossside
+                    tree = crossPointer;
+                }   
             }
         }
+        // if we are out of node
+        else
+        {
+            //go to the node
+            logFile("out of node");
+            binaryTree* path = initTreeNode(initTreeData(UNDEFINE,UNDEFINE));
+            goToDestAlgo(tree,initTreeData(stackinfo.locationX,stackinfo.locationY),path);
+            goToDest(tree,path);
+            tree = findNodeWithDfsWithLocation(toTreeRoot(tree),initTreeData(stackinfo.locationX,stackinfo.locationY));
+            //pushback the stackinfo because we didnt do anything but change the location
+            pushWithText(stack,stackinfo);
+        }
     }
-    
+    dfs(location[WIDTH],location[HEIGHT],mousehead);
+}
+
+void printCurrentNode(mapNode current, int head)
+{
+    mapNode realnode = getRealDirection(current,head);
+    sprintf(LogFileString,"current location:    (%2d,%2d)",location[WIDTH],location[HEIGHT]);
+    logFile(LogFileString);
+    sprintf(LogFileString,"current NESW:        (%2d,%2d,%2d,%2d)",realnode.north,realnode.east,realnode.south,realnode.west);
+    logFile(LogFileString);
+    sprintf(LogFileString,"mouse NESW:          (%2d,%2d,%2d,%2d) head: %d\n",current.north,current.east,current.south,current.west,mousehead);
+    logFile(LogFileString);
 }
 
 /**
@@ -515,26 +261,24 @@ int goToNextBranch()
     mapNode current = getNodeInfo();
     int way = 0;
     int entry = 0;
-    if(current.north == GRID || current.north == ENTRY)
+    if(current.north == GRID || ( !ISTRAVELALL&&current.north == ENTRY))
     {
         way++;
         if(current.north == ENTRY)
             entry++;
     }
-    if(current.west == GRID|| current.west == ENTRY)
+    if(current.west == GRID|| ( !ISTRAVELALL&&current.west == ENTRY))
     {
         way++;
         if(current.west == ENTRY)
             entry++;
     }
-    if(current.east == GRID|| current.east == ENTRY)
+    if(current.east == GRID|| ( !ISTRAVELALL&&current.east == ENTRY))
     {
         way++;
         if(current.east == ENTRY)
             entry++;
     }
-    if(current.south == ENTRY)
-        entry++;
     
     switch (way)
     {
@@ -554,6 +298,13 @@ int goToNextBranch()
             turn(LEFT);
         }
         go();
+        if(location[WIDTH] == 19 && location[HEIGHT]==0)
+        {
+            sprintf(LogFileString,"location:gotoNB x:%d, y:%d way:%d, entry:%d", location[WIDTH],location[HEIGHT],way,entry);
+            logFile(LogFileString);
+            printCurrentNode(getNodeInfo(),mousehead);
+        }
+        
         return goToNextBranch();
     case 2:
         if(entry)
@@ -584,7 +335,6 @@ void turn(char dir)
         }
         break;
     }
-
     mousehead = head;
     rotate(dir);
 }
@@ -594,20 +344,22 @@ void go()
     switch (mousehead)
     {
     case NORTH:
+    if(goNext())
         location[HEIGHT]++;
         break;
     case SOUTH:
+    if(goNext())
         location[HEIGHT]--;
         break;
     case EAST:
+    if(goNext())
         location[WIDTH]++;
         break;
     case WEST:
+    if(goNext())
         location[WIDTH]--;
         break;
-    }
-
-    goNext();
+    }    
 }
 
 void faceTo(int dir)
@@ -649,10 +401,10 @@ mapNode getRealDirection(mapNode fromMouseView, int head)
         RealDir.west = fromMouseView.east;
         break;
     case WEST:
-        RealDir.north = fromMouseView.west;
-        RealDir.south = fromMouseView.east;
-        RealDir.east = fromMouseView.north;
-        RealDir.west = fromMouseView.south;
+        RealDir.north = fromMouseView.east;
+        RealDir.south = fromMouseView.west;
+        RealDir.east = fromMouseView.south;
+        RealDir.west = fromMouseView.north;
         break;
     case EAST:
         RealDir.north = fromMouseView.west;
@@ -664,7 +416,7 @@ mapNode getRealDirection(mapNode fromMouseView, int head)
     return RealDir;
 }
 
-binaryTreeData initTreeData()
+binaryTreeData initTreeData(int x, int y)
 {
     binaryTreeData data;
     data.parentX = UNDEFINE;
@@ -676,8 +428,11 @@ binaryTreeData initTreeData()
     data.rightChildX = UNDEFINE;
     data.rightChildY = UNDEFINE;
     data.rightChildDir = UNDEFINE;
-    data.location[0] = 0;
-    data.location[1] = 0;
+    data.crossX = UNDEFINE;
+    data.crossY = UNDEFINE;
+    data.crossDir = UNDEFINE;
+    data.location[WIDTH] = x;
+    data.location[HEIGHT] = y;
     return data;
 }
 
@@ -732,45 +487,43 @@ int getBottom(int head)
 
 int printTreeText(binaryTree* root, int recurrsiveOrNot)
 {
-    
-
-    sprintf(string,"this node: x:%d, y:%d", root->data.location[WIDTH],root->data.location[HEIGHT]);
-    logFile(string);
+    sprintf(LogFileString,"this node:      (%2d,%2d)", root->data.location[WIDTH],root->data.location[HEIGHT]);
+    logFile(LogFileString);
 
     if(root->parent==NULL)
     {
-        sprintf(string,"\tparent: NULL");
-        logFile(string);
+        sprintf(LogFileString,"\tparent:       NULL");
+        logFile(LogFileString);
     }
     else
     {
-        sprintf(string,"\tparent: (%d,%d)\t dir:%d",root->data.parentX,root->data.parentY, root->data.parentDir);
-        logFile(string);
+        sprintf(LogFileString,"\tparent:       (%2d,%2d)   dir:%d",root->data.parentX,root->data.parentY, root->data.parentDir);
+        logFile(LogFileString);
     }
     if(root->leftChild==NULL)
     {
-        sprintf(string,"\tleftChild: NULL");
-        logFile(string);
+        sprintf(LogFileString,"\tleftChild:    NULL");
+        logFile(LogFileString);
     }
     else
     {
-        sprintf(string,"\tleftChild: (%d,%d)",root->data.leftChildX,root->data.leftChildY);
-        logFile(string);
+        sprintf(LogFileString,"\tleftChild:    (%2d,%2d)   dir:%d",root->data.leftChildX,root->data.leftChildY,root->data.leftChildDir);
+        logFile(LogFileString);
     }
     if(root->rightChild==NULL)
     {
-        sprintf(string,"\trightChild: NULL");
-        logFile(string);
+        sprintf(LogFileString,"\trightChild:   NULL");
+        logFile(LogFileString);
     }
     else
     {
-        sprintf(string,"\trightChild: (%d,%d)",root->data.rightChildX,root->data.rightChildY);
-        logFile(string);
+        sprintf(LogFileString,"\trightChild:   (%2d,%2d)   dir:%d",root->data.rightChildX,root->data.rightChildY,root->data.rightChildDir);
+        logFile(LogFileString);
     }
     if(root->cross!=NULL)
     {
-        sprintf(string,"\tcross: (%d,%d)",root->data.crossX,root->data.crossY);
-        logFile(string);
+        sprintf(LogFileString,"\tcross:        (%2d,%2d)   dir:%d",root->data.crossX,root->data.crossY,root->data.crossDir);
+        logFile(LogFileString);
     }
     if(root->rightChild==NULL && root->leftChild==NULL)
     {
@@ -789,16 +542,173 @@ int printTreeText(binaryTree* root, int recurrsiveOrNot)
 
 void printStackText(stackBase* base)
 {
-    sprintf(string, "Print Stack(%d):",getStackLen(base));
-    logFile(string);
+    sprintf(LogFileString, "Print Stack(%d):",getStackLen(base));
+    logFile(LogFileString);
     logFile("base");
     stackNode* pointer = base->next;
     int i;
     for(i = getStackLen(base); i>0; i--)
     {
-        sprintf(string, "(%d,%d),dir:%d",pointer->data.locationX,pointer->data.locationY,pointer->data.travelDir);
-        logFile(string);
+        sprintf(LogFileString, "(%d,%d),dir:%d",pointer->data.locationX,pointer->data.locationY,pointer->data.travelDir);
+        logFile(LogFileString);
         pointer = pointer->next;
     }
     logFile("top\n");
+}
+
+stackData popWithText(stackBase* base)
+{
+    stackData data = pop(base);
+    sprintf(LogFileString,"pop     (%2d,%2d),dir:%d\n", data.locationX,data.locationY,data.travelDir);
+    logFile(LogFileString);
+    return data;
+}
+
+int pushWithText(stackBase* base, stackData data)
+{
+    sprintf(LogFileString,"push    (%2d,%2d),dir:%d\n", data.locationX,data.locationY,data.travelDir);
+    logFile(LogFileString);
+    return push(base, data);
+}
+
+void goToDest(binaryTree* treeNode, binaryTree* path)
+{
+    int parentX = UNDEFINE, parentY = UNDEFINE;
+    do{
+        sprintf(LogFileString,"location: x:%d, y:%d", location[WIDTH],location[HEIGHT]);
+        logFile(LogFileString);
+        if(path->leftChild!=NULL && path->data.leftChildX!=parentX && path->data.leftChildY!=parentY)
+        {logFile("LogFileString1");
+            //set mouse
+            faceTo(treeNode->data.leftChildDir);
+            sprintf(LogFileString,"location:2 x:%d, y:%d", location[WIDTH],location[HEIGHT]);
+            logFile(LogFileString);
+            go();
+            sprintf(LogFileString,"location:2 x:%d, y:%d", location[WIDTH],location[HEIGHT]);
+            logFile(LogFileString);
+            goToNextBranch();
+            //set tree pointer
+            parentX = path->data.location[WIDTH];
+            parentY = path->data.location[HEIGHT];
+            path = path->leftChild;
+            treeNode = treeNode->leftChild;
+            sprintf(LogFileString,"location:2 x:%d, y:%d", location[WIDTH],location[HEIGHT]);
+            logFile(LogFileString);
+        }
+        else if(path->rightChild!=NULL && path->data.rightChildX!=parentX && path->data.rightChildY!=parentY)
+        {logFile("LogFileString2");
+            //set mouse
+            faceTo(treeNode->data.rightChildDir);
+            go();
+            goToNextBranch();
+            //set tree pointer
+            parentX = path->data.location[WIDTH];
+            parentY = path->data.location[HEIGHT];
+            path = path->rightChild;
+            treeNode = treeNode->rightChild;
+        }
+        else if(path->parent!=NULL && path->data.parentX!=parentX && path->data.parentY!=parentY)
+        {logFile("LogFileString3");
+            //set mouse
+            faceTo(treeNode->data.parentDir);
+            go();
+            goToNextBranch();
+            //set tree pointer
+            parentX = path->data.location[WIDTH];
+            parentY = path->data.location[HEIGHT];
+            path = path->parent;
+            treeNode = treeNode->parent;
+        }
+        else
+        {
+            break;
+        }
+        logFile("in while");
+        printTreeText(treeNode,0);
+    }while(1);
+}
+
+/**
+ * input the current node and dest Data
+ * pls use new tree to get the log, or it will break the current tree
+ */
+int goToDestAlgo(binaryTree* current, binaryTreeData destData, binaryTree* log)
+{
+    //if there is no this node in this tree, return Null
+    if(findNodeWithDfsWithLocation(toTreeRoot(current),destData) == NULL)
+    {
+        logFile("not found!");
+        return 0;
+    }
+    log->data.location[WIDTH] = current->data.location[WIDTH];
+    log->data.location[HEIGHT] = current->data.location[HEIGHT];
+
+    //base
+    if(current->data.location[WIDTH] == destData.location[WIDTH] && current->data.location[HEIGHT] == destData.location[HEIGHT])
+    {
+        logFile("found!");
+        return 1;
+    }
+    // if we can find it in current's subtree
+    if(findNodeWithDfsWithLocation(current,destData) != NULL)
+    {
+        if(findNodeWithDfsWithLocation(current->leftChild,destData) != NULL)
+        {
+            logFile("Go leftChild!");
+            log->leftChild = initTreeNode(initTreeData(current->leftChild->data.location[WIDTH],current->leftChild->data.location[HEIGHT]));
+            log->leftChild->parent = log;
+            
+            log->leftChild->data.parentX = current->leftChild->data.parentX;
+            log->leftChild->data.parentY = current->leftChild->data.parentY;
+            log->leftChild->data.parentDir = current->leftChild->data.parentDir;
+
+            log->data.leftChildDir = current->data.leftChildDir;
+            log->data.leftChildX = current->data.leftChildX;
+            log->data.leftChildY = current->data.leftChildY;
+            
+            return goToDestAlgo(current->leftChild, destData, log->leftChild);
+        }
+        else if(findNodeWithDfsWithLocation(current->rightChild,destData) != NULL)
+        {
+            logFile("Go rightChild!");
+            log->rightChild = initTreeNode(initTreeData(current->rightChild->data.location[WIDTH],current->rightChild->data.location[HEIGHT]));
+            log->rightChild->parent = log;
+
+            log->rightChild->data.parentX = current->rightChild->data.parentX;
+            log->rightChild->data.parentY = current->rightChild->data.parentY;
+            log->rightChild->data.parentDir = current->rightChild->data.parentDir;
+
+            log->data.rightChildDir = current->data.rightChildDir;
+            log->data.rightChildX = current->data.rightChildX;
+            log->data.rightChildY = current->data.rightChildY;
+            return goToDestAlgo(current->rightChild, destData, log->rightChild);
+        }
+    }
+    else
+    {
+        logFile("Go parent!");
+        log->parent = initTreeNode(initTreeData(current->parent->data.location[WIDTH],current->parent->data.location[HEIGHT]));
+        if(current->parent->leftChild == current)
+        {
+            log->parent->leftChild = log;
+
+            log->parent->data.leftChildX = current->parent->data.leftChildX;
+            log->parent->data.leftChildY = current->parent->data.leftChildY;
+            log->parent->data.leftChildDir = current->parent->data.leftChildDir;
+        }
+        else if(current->parent->rightChild == current)
+        {
+            log->parent->rightChild = log;
+            
+            log->parent->data.rightChildX = current->parent->data.rightChildX;
+            log->parent->data.rightChildY = current->parent->data.rightChildY;
+            log->parent->data.rightChildDir = current->parent->data.rightChildDir;
+        }
+        log->data.parentDir = current->data.parentDir;
+        log->data.parentX = current->data.parentX;
+        log->data.parentY = current->data.parentY;
+        return goToDestAlgo(current->parent, destData, log->parent);
+    }
+    // cannot reach here
+    return 0;
 }

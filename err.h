@@ -8,6 +8,8 @@ int err(int);
 int logFile(char*);
 void initErrLog();
 
+char LogFileString[MAXSTRINGSIZE];
+
 // error codes
 #define NOINITERR 0x01
 #define FILEERR 0x02
