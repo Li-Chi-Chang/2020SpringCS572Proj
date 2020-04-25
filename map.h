@@ -59,10 +59,10 @@ mapNode getNodeInfo();
 #define ISPRINTTRACE 1
 
 // print name node or not
-#define ISPRINTNAME 0
+#define ISPRINTNAME 1
 
 // print fork node or not
-#define ISPRINTFORKNODE 1
+#define ISPRINTFORKNODE 0
 
 // delaying time
 #define DELAYING 50000

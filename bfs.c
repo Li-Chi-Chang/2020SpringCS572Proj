@@ -32,8 +32,7 @@ void printStackText(stackBase*);
 stackData popWithText(stackBase*);
 int pushWithText(stackBase*, stackData);
 void printCurrentNode(mapNode, int);
-
-
+int findEmptyCrossField(binaryTree*);
 
 char mousehead = NORTH;
 int location[2] = {0,0};// 1:x 0:y
@@ -119,15 +118,26 @@ void dfs(int parentX, int parentY, int exitDir)
         exit(1);
     }
     stackData stackinfo =  popWithText(stack);
+    printStackText(stack);
     printCurrentNode(getNodeInfo(),mousehead);
     printTreeText(toTreeRoot(tree),1);
     //check the path is searched or not
     binaryTree* pointer = findNodeWithDfsWithLocation(toTreeRoot(tree),initTreeData(location[WIDTH],location[HEIGHT]));
     //if exist, check the path is searched
-    if((pointer->data.crossDir == stackinfo.travelDir || pointer->data.leftChildDir == stackinfo.travelDir || pointer->data.rightChildDir == stackinfo.travelDir || pointer->data.parentDir == stackinfo.travelDir) && pointer->data.location[WIDTH] == stackinfo.locationX && pointer->data.location[HEIGHT] == stackinfo.locationY)
+    int foundDirInCross=0,i;
+    for(i=0,foundDirInCross=0;i<MAXCROSS && pointer->cross[i]!=NULL;i++)
+    {
+        if(pointer->data.crossDir[i] == stackinfo.travelDir)
+        {
+            foundDirInCross++;
+            break;
+        }
+    }
+    if((foundDirInCross || pointer->data.leftChildDir == stackinfo.travelDir || pointer->data.rightChildDir == stackinfo.travelDir || pointer->data.parentDir == stackinfo.travelDir) && pointer->data.location[WIDTH] == stackinfo.locationX && pointer->data.location[HEIGHT] == stackinfo.locationY)
     {
         //do nothing
         logFile("This path is searched");
+        return dfs(location[WIDTH],location[HEIGHT],mousehead);
     }
     //if the path is not searched
     else
@@ -164,6 +174,7 @@ void dfs(int parentX, int parentY, int exitDir)
                     tree->rightChild = newNode;
                     tree->data.rightChildDir = stackinfo.travelDir;
                     tree->data.rightChildX = newNode->data.location[WIDTH];
+                    tree->data.rightChildY = newNode->data.location[HEIGHT];
                 }
                 //set the pointer to current node
                 tree = newNode;
@@ -198,8 +209,10 @@ void dfs(int parentX, int parentY, int exitDir)
             else
             {
                 binaryTree* crossPointer = findNodeWithDfsWithLocation(toTreeRoot(tree),initTreeData(location[WIDTH],location[HEIGHT]));
+                int crossOffset = findEmptyCrossField(crossPointer);
+                int treeOffset = findEmptyCrossField(tree);
                 //if the cross is not empty
-                if(tree->cross != NULL)
+                if(crossOffset== MAXCROSS || treeOffset==MAXCROSS)
                 {
                     logFile("out of corss number!");
                     exit(1);
@@ -208,23 +221,44 @@ void dfs(int parentX, int parentY, int exitDir)
                 else
                 {
                     //data at tree side
-                    tree->cross = crossPointer;
-                    tree->data.crossDir = stackinfo.travelDir;
-                    tree->data.crossX = crossPointer->data.location[WIDTH];
-                    tree->data.crossY = crossPointer->data.location[HEIGHT];
+                    tree->cross[treeOffset] = crossPointer;
+                    tree->data.crossDir[treeOffset] = stackinfo.travelDir;
+                    tree->data.crossX[treeOffset] = crossPointer->data.location[WIDTH];
+                    tree->data.crossY[treeOffset] = crossPointer->data.location[HEIGHT];
                     //data at cross side
-                    crossPointer->cross = tree;
-                    crossPointer->data.crossDir = getBottom(mousehead);
-                    crossPointer->data.crossX = tree->data.location[WIDTH];
-                    crossPointer->data.crossY = tree->data.location[HEIGHT];
-                    //set the tree location to crossside
-                    tree = crossPointer;
+                    crossPointer->cross[crossOffset] = tree;
+                    crossPointer->data.crossDir[crossOffset] = getBottom(mousehead);
+                    crossPointer->data.crossX[crossOffset] = tree->data.location[WIDTH];
+                    crossPointer->data.crossY[crossOffset] = tree->data.location[HEIGHT];
+                    //back to original node
+                    turn(LEFT);
+                    turn(LEFT);
+                    go();
+                    goToNextBranch();
                 }   
             }
         }
         // if we are out of node
         else
         {
+            //check if this path is searched skip
+            logFile("check the path is searched?");
+            binaryTree* remoteCheck = findNodeWithDfsWithLocation(toTreeRoot(tree),initTreeData(stackinfo.locationX,stackinfo.locationY));
+            int foundDirInCross=0,i;
+            for(i=0,foundDirInCross=0;i<MAXCROSS && remoteCheck->cross[i]!=NULL;i++)
+            {
+                if(remoteCheck->data.crossDir[i] == stackinfo.travelDir)
+                {
+                    foundDirInCross++;
+                    break;
+                }
+            }
+            if((foundDirInCross || remoteCheck->data.leftChildDir == stackinfo.travelDir || remoteCheck->data.rightChildDir == stackinfo.travelDir || remoteCheck->data.parentDir == stackinfo.travelDir) && remoteCheck->data.location[WIDTH] == stackinfo.locationX && remoteCheck->data.location[HEIGHT] == stackinfo.locationY)
+            {
+                //do nothing
+                logFile("This path is searched");
+                return dfs(location[WIDTH],location[HEIGHT],mousehead);
+            }
             //go to the node
             logFile("out of node");
             binaryTree* path = initTreeNode(initTreeData(UNDEFINE,UNDEFINE));
@@ -252,6 +286,7 @@ void printCurrentNode(mapNode current, int head)
 /**
  * return 0 go to a normal node
  * return 1 hit the entry
+ * return 2 hit the name node
  * algo: go until meet branch
  * If meet a brach, go the right side
  * using the bfs algo
@@ -259,6 +294,12 @@ void printCurrentNode(mapNode current, int head)
 int goToNextBranch()
 {
     mapNode current = getNodeInfo();
+
+    //if hit name node return
+    if(current.name>='A'&&current.name<='z')
+    {
+        return 2;
+    }
     int way = 0;
     int entry = 0;
     if(current.north == GRID || ( !ISTRAVELALL&&current.north == ENTRY))
@@ -298,13 +339,6 @@ int goToNextBranch()
             turn(LEFT);
         }
         go();
-        if(location[WIDTH] == 19 && location[HEIGHT]==0)
-        {
-            sprintf(LogFileString,"location:gotoNB x:%d, y:%d way:%d, entry:%d", location[WIDTH],location[HEIGHT],way,entry);
-            logFile(LogFileString);
-            printCurrentNode(getNodeInfo(),mousehead);
-        }
-        
         return goToNextBranch();
     case 2:
         if(entry)
@@ -428,9 +462,13 @@ binaryTreeData initTreeData(int x, int y)
     data.rightChildX = UNDEFINE;
     data.rightChildY = UNDEFINE;
     data.rightChildDir = UNDEFINE;
-    data.crossX = UNDEFINE;
-    data.crossY = UNDEFINE;
-    data.crossDir = UNDEFINE;
+    int i;
+    for(i=0;i<MAXCROSS;i++)
+    {
+        data.crossX[MAXCROSS] = UNDEFINE;
+        data.crossY[MAXCROSS] = UNDEFINE;
+        data.crossDir[MAXCROSS] = UNDEFINE;
+    }
     data.location[WIDTH] = x;
     data.location[HEIGHT] = y;
     return data;
@@ -520,10 +558,12 @@ int printTreeText(binaryTree* root, int recurrsiveOrNot)
         sprintf(LogFileString,"\trightChild:   (%2d,%2d)   dir:%d",root->data.rightChildX,root->data.rightChildY,root->data.rightChildDir);
         logFile(LogFileString);
     }
-    if(root->cross!=NULL)
+    int i=0;
+    while(i<MAXCROSS && root->cross[i]!=NULL)
     {
-        sprintf(LogFileString,"\tcross:        (%2d,%2d)   dir:%d",root->data.crossX,root->data.crossY,root->data.crossDir);
+        sprintf(LogFileString,"\tcross[%d]:    (%2d,%2d)   dir:%d",i,root->data.crossX[i],root->data.crossY[i],root->data.crossDir[i]);
         logFile(LogFileString);
+        i++;
     }
     if(root->rightChild==NULL && root->leftChild==NULL)
     {
@@ -575,28 +615,26 @@ void goToDest(binaryTree* treeNode, binaryTree* path)
 {
     int parentX = UNDEFINE, parentY = UNDEFINE;
     do{
+        logFile(">>>>>>>");
         sprintf(LogFileString,"location: x:%d, y:%d", location[WIDTH],location[HEIGHT]);
         logFile(LogFileString);
-        if(path->leftChild!=NULL && path->data.leftChildX!=parentX && path->data.leftChildY!=parentY)
-        {logFile("LogFileString1");
+        sprintf(LogFileString,"parentX:%d, parentY:%d",parentX,parentY);
+        logFile(LogFileString);
+        printTreeText(path,0);
+        if(path->leftChild!=NULL && (path->data.leftChildX!=parentX || path->data.leftChildY!=parentY))
+        {
             //set mouse
             faceTo(treeNode->data.leftChildDir);
-            sprintf(LogFileString,"location:2 x:%d, y:%d", location[WIDTH],location[HEIGHT]);
-            logFile(LogFileString);
             go();
-            sprintf(LogFileString,"location:2 x:%d, y:%d", location[WIDTH],location[HEIGHT]);
-            logFile(LogFileString);
             goToNextBranch();
             //set tree pointer
             parentX = path->data.location[WIDTH];
             parentY = path->data.location[HEIGHT];
             path = path->leftChild;
             treeNode = treeNode->leftChild;
-            sprintf(LogFileString,"location:2 x:%d, y:%d", location[WIDTH],location[HEIGHT]);
-            logFile(LogFileString);
         }
-        else if(path->rightChild!=NULL && path->data.rightChildX!=parentX && path->data.rightChildY!=parentY)
-        {logFile("LogFileString2");
+        else if(path->rightChild!=NULL && (path->data.rightChildX!=parentX || path->data.rightChildY!=parentY))
+        {
             //set mouse
             faceTo(treeNode->data.rightChildDir);
             go();
@@ -607,8 +645,8 @@ void goToDest(binaryTree* treeNode, binaryTree* path)
             path = path->rightChild;
             treeNode = treeNode->rightChild;
         }
-        else if(path->parent!=NULL && path->data.parentX!=parentX && path->data.parentY!=parentY)
-        {logFile("LogFileString3");
+        else if(path->parent!=NULL && (path->data.parentX!=parentX || path->data.parentY!=parentY))
+        {
             //set mouse
             faceTo(treeNode->data.parentDir);
             go();
@@ -618,13 +656,15 @@ void goToDest(binaryTree* treeNode, binaryTree* path)
             parentY = path->data.location[HEIGHT];
             path = path->parent;
             treeNode = treeNode->parent;
+            sprintf(LogFileString,"location2: x:%d, y:%d", location[WIDTH],location[HEIGHT]);
+            logFile(LogFileString);
         }
         else
         {
             break;
         }
         logFile("in while");
-        printTreeText(treeNode,0);
+        logFile("<<<<<<<<");
     }while(1);
 }
 
@@ -711,4 +751,17 @@ int goToDestAlgo(binaryTree* current, binaryTreeData destData, binaryTree* log)
     }
     // cannot reach here
     return 0;
+}
+
+int findEmptyCrossField(binaryTree* root)
+{
+    int i;
+    for(i=0;i<MAXCROSS;i++)
+    {
+        if(root->cross[i]==NULL)
+        {
+            return i;
+        }
+    }
+    return MAXCROSS;
 }
