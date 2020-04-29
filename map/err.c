@@ -43,5 +43,5 @@ int logFile(char* string)
 void initErrLog()
 {
     isInitErrLog = 1;
-    system("rm log.txt\n");
+    system("[ -f log.txt ] && rm log.txt || echo \n");
 }

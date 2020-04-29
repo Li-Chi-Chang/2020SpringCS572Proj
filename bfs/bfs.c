@@ -1,7 +1,7 @@
-#include "map.h"
-#include "stack_C/stack.h"
-#include "linkedList_C/linkedList.h"
-#include "binaryTree_C/binaryTree.h"
+#include "../map/map.h"
+#include "../stack_C/stack.h"
+#include "../linkedList_C/linkedList.h"
+#include "../binaryTree_C/binaryTree.h"
 
 //basic actions
 void turn(char);//turn a direction
