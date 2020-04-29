@@ -7,3 +7,6 @@
 [submodule "binaryTree_C"]
 	path = binaryTree_C
 	url = https://github.com/Li-Chi-Chang/binaryTree_C.git
+[submodule "queue_C"]
+	path = queue_C
+	url = https://github.com/Li-Chi-Chang/queue_C.git
