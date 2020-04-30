@@ -1,9 +1,9 @@
 all: dijkstra
-	gcc -o out/dijkstra obj/map.o obj/err.o obj/dijkstra.o obj/stack.o obj/binaryTree.o -Wall
+	gcc -o out/dijkstra obj/map.o obj/err.o obj/dijkstra.o obj/stack.o obj/binaryTree.o obj/queue.o -Wall
 
-dijkstra: dijkstra.c map stack binaryTree
+dijkstra: dijkstra.c map stack binaryTree queue
 	gcc -c dijkstra.c -o dijkstra.o -Wall
-	cp bfs.o obj/dijkstra.o
+	cp dijkstra.o obj/dijkstra.o
 	rm dijkstra.o
 
 stack: ../stack_C/stack.c ../stack_C/stack.h
@@ -15,6 +15,11 @@ binaryTree: ../binaryTree_C/binaryTree.c ../binaryTree_C/binaryTree.h
 	gcc -c ../binaryTree_C/binaryTree.c -o binaryTree.o -Wall
 	cp binaryTree.o obj/binaryTree.o
 	rm binaryTree.o
+
+queue: ../queue_C/queue.c ../queue_C/queue.h
+	gcc -c ../queue_C/queue.c -o queue.o -Wall
+	cp queue.o obj/queue.o
+	rm queue.o
 
 map: ../map/map.c ../map/err.c base
 	gcc -c ../map/err.c -o err.o -Wall

@@ -20,6 +20,9 @@ int err(int code)
     case BREAKPOINT:
         printf("Break Point\n");
         exit(1);
+    case SOMETHINGEMPTY:
+        printf("Error here.\nerr code: %d SOMETHING EMPTY!\n",code);
+        exit(1);
     default:
         return code;
     }
