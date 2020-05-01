@@ -38,6 +38,8 @@ stackData popStackWithText(stackBase*);
 int pushStackWithText(stackBase*, stackData);
 
 queueData popQueueWithTextOrdered(queueBase*, binaryTree*);
+int pushQueueWithTextOrdered(queueBase*, queueData, binaryTree*);
+
 queueData popQueueWithText(queueBase*);
 int pushQueueWithText(queueBase*, queueData);
 void printQueueText(queueBase*);
@@ -77,22 +79,22 @@ int main(void)
     if(getRealDirection(getNodeInfo(),mousehead).north == GRID)
     {
         qData.travelDir = NORTH;
-        pushQueueWithText(queue, qData);
+        pushQueueWithTextOrdered(queue, qData, tree);
     }
     if(getRealDirection(getNodeInfo(),mousehead).east == GRID)
     {
         qData.travelDir = EAST;
-        pushQueueWithText(queue, qData);
+        pushQueueWithTextOrdered(queue, qData, tree);
     }
     if(getRealDirection(getNodeInfo(),mousehead).south == GRID)
     {
         qData.travelDir = SOUTH;
-        pushQueueWithText(queue, qData);
+        pushQueueWithTextOrdered(queue, qData, tree);
     }
     if(getRealDirection(getNodeInfo(),mousehead).west == GRID)
     {
         qData.travelDir = WEST;
-        pushQueueWithText(queue, qData);
+        pushQueueWithTextOrdered(queue, qData, tree);
     }
     
     dijkstra();
@@ -268,22 +270,22 @@ void dijkstra()
         if(getRealDirection(getNodeInfo(),mousehead).north == GRID && tree->cross[cross]->data.parentDir != NORTH)
         {
             qData.travelDir = NORTH;
-            pushQueueWithText(queue, qData);
+            pushQueueWithTextOrdered(queue, qData, tree);
         }
         if(getRealDirection(getNodeInfo(),mousehead).east == GRID && tree->cross[cross]->data.parentDir != EAST)
         {
             qData.travelDir = EAST;
-            pushQueueWithText(queue, qData);
+            pushQueueWithTextOrdered(queue, qData, tree);
         }
         if(getRealDirection(getNodeInfo(),mousehead).south == GRID && tree->cross[cross]->data.parentDir != SOUTH)
         {
             qData.travelDir = SOUTH;
-            pushQueueWithText(queue, qData);
+            pushQueueWithTextOrdered(queue, qData, tree);
         }
         if(getRealDirection(getNodeInfo(),mousehead).west == GRID && tree->cross[cross]->data.parentDir != WEST)
         {
             qData.travelDir = WEST;
-            pushQueueWithText(queue, qData);
+            pushQueueWithTextOrdered(queue, qData, tree);
         }
 
         tree = tree->cross[cross];
@@ -680,6 +682,17 @@ int pushQueueWithText(queueBase* base, queueData data)
     return pushQueue(base, data);
 }
 
+int pushQueueWithTextOrdered(queueBase* base, queueData data, binaryTree* node)
+{
+    //todo!
+    /**
+     * calculate the estimate cost and the data in queue, output the min cost
+     */ 
+    sprintf(LogFileString,"pushQ\t(%2d,%2d),dir:%d\n", data.locationX,data.locationY,data.travelDir);
+    logFile(LogFileString);
+    return pushQueue(base, data);
+}
+
 queueData popQueueWithText(queueBase* base)
 {
     queueData data = popQueue(base);
@@ -691,6 +704,9 @@ queueData popQueueWithText(queueBase* base)
 queueData popQueueWithTextOrdered(queueBase* base, binaryTree* node)
 {
     //todo!
+    /**
+     * calculate the estimate cost and the data in queue, output the min cost
+     */ 
     queueData data = popQueue(base);
     sprintf(LogFileString,"popQ\t(%2d,%2d),dir:%d\n", data.locationX,data.locationY,data.travelDir);
     logFile(LogFileString);

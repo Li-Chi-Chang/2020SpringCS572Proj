@@ -1,10 +1,10 @@
-all: bfs
-	gcc -o out/bfs obj/map.o obj/err.o obj/bfs.o obj/stack.o obj/binaryTree.o -Wall
+all: dfs
+	gcc -o out/dfs obj/map.o obj/err.o obj/dfs.o obj/stack.o obj/binaryTree.o -Wall
 
-bfs: bfs.c map stack binaryTree
-	gcc -c bfs.c -o bfs.o -Wall
-	cp bfs.o obj/bfs.o
-	rm bfs.o
+dfs: dfs.c map stack binaryTree
+	gcc -c dfs.c -o dfs.o -Wall
+	cp dfs.o obj/dfs.o
+	rm dfs.o
 
 stack: ../stack_C/stack.c ../stack_C/stack.h
 	gcc -c ../stack_C/stack.c -o stack.o -Wall
